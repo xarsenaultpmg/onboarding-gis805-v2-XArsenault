@@ -1,0 +1,20 @@
+============================================
+NexaMart Validation: 0 PASS, 0 FAIL, 16 SKIP
+============================================
+
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_date does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_product does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_store does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_channel does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_customer does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_date does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_product does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_store does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_channel does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_customer does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
