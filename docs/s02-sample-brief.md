@@ -19,19 +19,48 @@ ce que chaque ligne représente sans devoir lire le DDL.]
 
 ## Étoile construite
 
-```
-dim_date ----+
-dim_product --+
-dim_store ----+-- fact_sales
-dim_customer -+
-dim_channel --+
+```mermaid
+erDiagram
+    DIM_DATE     ||--o{ FACT_SALES : "order_date"
+    DIM_PRODUCT  ||--o{ FACT_SALES : "product_id"
+    DIM_STORE    ||--o{ FACT_SALES : "store_id"
+    DIM_CUSTOMER ||--o{ FACT_SALES : "customer_id"
+    DIM_CHANNEL  ||--o{ FACT_SALES : "channel_id"
+
+    FACT_SALES {
+        string order_number   "degenerate dim"
+        int    sale_line_id   PK
+        int    quantity       "additive"
+        decimal net_price     "additive"
+        decimal line_total    "additive"
+        decimal discount_pct  "non-additive"
+    }
 ```
 
 - **5 dimensions conformes** reliées par FK à `fact_sales`
 - Mesures : `quantity` (additive), `net_price` (additive), `line_total` (additive), `discount_pct` (non-additive -> moyenne pondérée)
 
+[-> Le diagramme Mermaid se rend automatiquement dans VS Code (avec l'extension
+`Markdown Preview Mermaid Support`, déjà installée par le devcontainer) et
+directement sur GitHub. Pas de PNG à maintenir.]
+
 [-> Le diagramme est simple et montre la structure sans détail inutile.
 La distinction additive / non-additive montre une compréhension du concept.]
+
+### Comment générer ce diagramme avec votre assistant IA
+
+Collez un prompt comme celui-ci dans Copilot Chat :
+
+> *« Génère un diagramme Mermaid `erDiagram` pour mon étoile NexaMart.
+> Au centre : `FACT_SALES` au grain « une ligne de commande »
+> (`order_number` + `sale_line_id`), avec les mesures `quantity`, `net_price`,
+> `line_total`, `discount_pct`. Cinq dimensions reliées par FK :
+> `dim_date`, `dim_product`, `dim_store`, `dim_customer`, `dim_channel`.
+> Inclus le bloc dans un fichier Markdown. »*
+
+Un modèle complet, prêt à copier, est disponible dans
+[`docs/visuals/star-schema.md`](visuals/star-schema.md).
+
 
 ## SQL preuve
 
