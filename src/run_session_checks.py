@@ -146,13 +146,13 @@ def check_required_artefact(art: dict, mode: str) -> dict:
     out = {"check": "required_artefact", "path": rel}
     if not p.exists():
         out["severity"] = SEV_SUBMIT if mode == "submit" else SEV_WARN
-        out["message"] = f"missing file: {rel}"
+        out["message"] = f"fichier absent : {rel}"
         return out
     size = p.stat().st_size
     min_bytes = art.get("min_bytes", 0)
     if size < min_bytes:
         out["severity"] = SEV_SUBMIT if mode == "submit" else SEV_WARN
-        out["message"] = f"too short: {size}B < {min_bytes}B"
+        out["message"] = f"trop court : {size} o < {min_bytes} o"
         return out
     sections = art.get("must_contain_sections")
     if sections:
@@ -163,10 +163,10 @@ def check_required_artefact(art: dict, mode: str) -> dict:
         if missing:
             # Missing sections are coaching warnings, not submit blockers.
             out["severity"] = SEV_WARN
-            out["message"] = f"missing sections: {', '.join(missing)}"
+            out["message"] = f"sections manquantes : {', '.join(missing)}"
             return out
     out["severity"] = SEV_PASS
-    out["message"] = f"OK ({size}B)"
+    out["message"] = f"OK ({size} o)"
     return out
 
 
@@ -182,19 +182,19 @@ def check_sql_artefact(art: dict, mode: str) -> dict:
     out = {"check": "sql_artefact", "path": rel}
     if not p.exists():
         out["severity"] = SEV_SUBMIT if mode == "submit" else SEV_WARN
-        out["message"] = f"missing file: {rel}"
+        out["message"] = f"fichier absent : {rel}"
         return out
     sql = p.read_text(encoding="utf-8")
     if not sql.strip():
         out["severity"] = SEV_SUBMIT if mode == "submit" else SEV_WARN
-        out["message"] = "file is empty"
+        out["message"] = "fichier vide"
         return out
     # Parse-check using a throwaway in-memory DuckDB. EXPLAIN doesn't run
     # the statement but does parse + bind it. We split by ';' to surface
     # the first failing statement.
     if duckdb is None:
         out["severity"] = SEV_WARN
-        out["message"] = "duckdb not installed; skipped parse-check"
+        out["message"] = "duckdb non installé ; vérification ignorée"
         return out
     try:
         con = duckdb.connect(":memory:")
@@ -203,7 +203,7 @@ def check_sql_artefact(art: dict, mode: str) -> dict:
                 con.execute(f"EXPLAIN {stmt}")
             except duckdb.ParserException as e:
                 out["severity"] = SEV_ERROR
-                out["message"] = f"SQL parse error: {str(e).splitlines()[0]}"
+                out["message"] = f"erreur syntaxe SQL : {str(e).splitlines()[0]}"
                 con.close()
                 return out
             except duckdb.Error:
@@ -213,17 +213,17 @@ def check_sql_artefact(art: dict, mode: str) -> dict:
         con.close()
     except Exception as e:
         out["severity"] = SEV_WARN
-        out["message"] = f"could not parse-check: {e}"
+        out["message"] = f"vérification syntaxique impossible : {e}"
         return out
     target = art.get("must_create_object")
     if target:
         if not re.search(rf"\bCREATE\s+(OR\s+REPLACE\s+)?(TABLE|VIEW)\s+(?:IF\s+NOT\s+EXISTS\s+)?{re.escape(target)}\b",
                          sql, re.IGNORECASE):
             out["severity"] = SEV_WARN
-            out["message"] = f"does not CREATE object '{target}'"
+            out["message"] = f"ne crée pas l'objet '{target}'"
             return out
     out["severity"] = SEV_PASS
-    out["message"] = f"parses OK, creates {target or '(unspecified)'}"
+    out["message"] = f"syntaxe OK, crée {target or '(non spécifié)'}"
     return out
 
 
@@ -251,7 +251,7 @@ def check_deadline(sdef: dict, today: date) -> dict | None:
         return {
             "check": "deadline",
             "severity": SEV_WARN,
-            "message": f"deadline passed ({dl}); coaching only, not blocking",
+            "message": f"échéance dépassée ({dl}) ; rétroaction seulement, non bloquant",
         }
     return None
 
@@ -283,11 +283,11 @@ def run_warehouse_checks(rule_names: list[str]) -> list[dict]:
         return results
     if duckdb is None:
         return [{"check": "warehouse", "rule": "all",
-                 "severity": SEV_WARN, "message": "duckdb not installed"}]
+                 "severity": SEV_WARN, "message": "duckdb non installé"}]
     if not DB_PATH.exists():
         return [{"check": "warehouse", "rule": r,
                  "severity": SEV_WARN,
-                 "message": "db/nexamart.duckdb not built; skipped"}
+                 "message": "db/nexamart.duckdb non construit ; ignoré"}
                 for r in rule_names]
     blocks = parse_checks_sql()
     con = duckdb.connect(str(DB_PATH), read_only=True)
@@ -296,7 +296,7 @@ def run_warehouse_checks(rule_names: list[str]) -> list[dict]:
         if not stmts:
             results.append({"check": "warehouse", "rule": name,
                             "severity": SEV_WARN,
-                            "message": "rule not found in checks.sql"})
+                            "message": "règle introuvable dans checks.sql"})
             continue
         for stmt in stmts:
             try:
@@ -315,12 +315,12 @@ def run_warehouse_checks(rule_names: list[str]) -> list[dict]:
             except duckdb.CatalogException as e:
                 results.append({"check": "warehouse", "rule": name,
                                 "severity": SEV_INFO,
-                                "message": f"SKIP (table missing): "
+                                "message": f"IGNORÉ (table absente) : "
                                            f"{str(e).splitlines()[0]}"})
             except duckdb.Error as e:
                 results.append({"check": "warehouse", "rule": name,
                                 "severity": SEV_WARN,
-                                "message": f"runtime error: {e}"})
+                                "message": f"erreur d'exécution : {e}"})
     con.close()
     return results
 
@@ -340,27 +340,27 @@ ICON = {
 
 def render_md(report: dict) -> str:
     lines = [
-        f"# Session Report — `{report['mode']}` mode",
+        f"# Rapport de validation — mode `{report['mode']}`",
         "",
-        f"- Sessions detected: **{', '.join(report['sessions']) or '(none)'}**",
-        f"- Mode: `{report['mode']}`",
-        f"- Blocking: **{'YES' if report['blocking'] else 'no'}**  "
+        f"- Sessions détectées : **{', '.join(report['sessions']) or '(aucune)'}**",
+        f"- Mode : `{report['mode']}`",
+        f"- Bloquant : **{'OUI' if report['blocking'] else 'non'}**  "
         f"({report['counts']})",
         "",
     ]
     if not report["sessions"]:
-        lines += ["_No session-relevant changes detected. Nothing to check._"]
+        lines += ["_Aucune modification pertinente détectée. Rien à vérifier._"]
         return "\n".join(lines)
     for sid in report["sessions"]:
         sec = report["per_session"][sid]
         lines += [f"## {sid} — {sec['title']}", ""]
         if sec["deadline_warning"]:
-            lines += [f"- {ICON[SEV_WARN]} Deadline: "
+            lines += [f"- {ICON[SEV_WARN]} Échéance : "
                       f"{sec['deadline_warning']['message']}", ""]
         if not sec["results"]:
-            lines += ["_No checks executed._", ""]
+            lines += ["_Aucune vérification exécutée._", ""]
             continue
-        lines += ["| Severity | Check | Message |", "|---|---|---|"]
+        lines += ["| Sévérité | Vérification | Message |", "|---|---|---|"]
         for r in sec["results"]:
             ic = ICON.get(r["severity"], "?")
             ck = r.get("check", "")
