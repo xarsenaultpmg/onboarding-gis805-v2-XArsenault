@@ -1,0 +1,17 @@
+# ============================================================
+# prompt_allowlist.txt — SHA-256 hashes of approved prompts.
+# ============================================================
+# grade_brief.py refuses to call the LLM if the loaded prompt's
+# SHA-256 is not on this list. To approve a new prompt:
+#   python tools/grader/grade_brief.py --print-prompt-hash > tmp.txt
+# Then paste the hash here on a new line, prefixed with the
+# filename for human readability.
+#
+# Format:    <sha256>    <relative path>
+# Empty lines and lines starting with '#' are ignored.
+# ============================================================
+
+# (initial value: filled automatically by grade_brief.py
+#  --bootstrap-allowlist, see README.)
+
+505f32d1d8319d66c41f3116aabe29d411f615402a1bf55eff2e60ef2dee9d41    tools/grader/prompts/grader_system.md
