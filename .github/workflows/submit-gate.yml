@@ -1,0 +1,101 @@
+# ============================================================
+# submit-gate.yml — Formal submission gate (no PR required).
+# ============================================================
+# Two ways students trigger this:
+#
+#  A) ACTIONS BUTTON (no terminal needed):
+#     GitHub → Actions → "Submit Gate" → Run workflow
+#     → pick a1 / a2 / final → click "Run workflow"
+#
+#  B) FILE DROP (just commit & push):
+#     Edit submissions/a1/SUBMIT.md (write team name) → commit → push.
+#     The workflow detects which window from the changed path.
+#
+# Both run the same strict checks (--mode submit). The Actions run
+# history + the commit SHA are the submission receipt.
+# Branches and PRs are NOT required.
+# ============================================================
+
+name: Submit Gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'submissions/a1/SUBMIT.md'
+      - 'submissions/a2/SUBMIT.md'
+      - 'submissions/final/SUBMIT.md'
+  workflow_dispatch:
+    inputs:
+      window:
+        description: "Fenêtre de remise / Submission window"
+        required: true
+        type: choice
+        options:
+          - a1
+          - a2
+          - final
+
+permissions:
+  contents: read
+
+jobs:
+  structural-submit-gate:
+    name: structural-submit-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Resolve submission window
+        id: win
+        run: |
+          if [ -n "${{ github.event.inputs.window }}" ]; then
+            WIN="${{ github.event.inputs.window }}"
+          else
+            # Infer from which SUBMIT.md changed.
+            BEFORE="${{ github.event.before }}"
+            if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              BEFORE="HEAD~1"
+            fi
+            FILES=$(git diff --name-only "${BEFORE}..${{ github.sha }}" 2>/dev/null || echo "")
+            if echo "$FILES" | grep -q 'submissions/final/'; then
+              WIN="final"
+            elif echo "$FILES" | grep -q 'submissions/a2/'; then
+              WIN="a2"
+            else
+              WIN="a1"
+            fi
+          fi
+          echo "window=$WIN" >> "$GITHUB_OUTPUT"
+          echo "Submission window: $WIN"
+
+      - name: Generate data
+        run: |
+          python scripts/datagen/gen_all.py \
+            --team-seed $(python scripts/datagen/_compute_seed.py) || true
+
+      - name: Build warehouse (best-effort)
+        run: python src/run_pipeline.py || true
+
+      - name: Run session-aware checks (submit mode)
+        run: |
+          python src/run_session_checks.py \
+            --mode submit \
+            --window ${{ steps.win.outputs.window }}
+
+      - name: Upload session report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: session-report-${{ steps.win.outputs.window }}-run${{ github.run_number }}
+          path: validation/results/session_report.*
