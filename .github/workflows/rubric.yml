@@ -1,0 +1,128 @@
+# ============================================================
+# rubric.yml — Optional LLM-backed rubric grading (advisory).
+# ============================================================
+# This workflow runs ONLY when:
+#   * The org/repo Actions Variable RUBRIC_ENABLED == 'true', OR
+#   * It was triggered manually via workflow_dispatch.
+#
+# Toggling from the dashboard:
+#   gh variable set RUBRIC_ENABLED --body "true"   # enable
+#   gh variable set RUBRIC_ENABLED --body "false"  # disable
+# (or via the GitHub UI: Settings → Secrets and variables →
+#  Actions → Variables tab)
+#
+# When enabled, on every PR to submit/aX it grades each new or
+# changed answers/SXX_executive_brief.md against the session
+# rubric and posts a sticky comment on the PR.
+#
+# This workflow NEVER fails the PR (always exits 0). It is
+# strictly advisory — the structural-submit-gate stays the
+# authoritative blocker.
+# ============================================================
+
+name: Rubric (advisory)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'submissions/a1/SUBMIT.md'
+      - 'submissions/a2/SUBMIT.md'
+      - 'submissions/final/SUBMIT.md'
+  workflow_dispatch:
+    inputs:
+      brief_path:
+        description: "Path to the brief to grade (e.g. answers/S01_executive_brief.md)"
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  rubric:
+    name: rubric-advisory
+    if: vars.RUBRIC_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # NOTE: the reference briefs (answer key) are NOT shipped in the
+      # student repo. To grade against them, an instructor must mount
+      # them at tools/grader/reference/ during the workflow — for
+      # example by checking out a private repo with a deploy key:
+      #
+      #   - uses: actions/checkout@v4
+      #     with:
+      #       repository: gis805-2026/reference-briefs
+      #       token: ${{ secrets.REFERENCE_BRIEFS_TOKEN }}
+      #       path: tools/grader/reference
+      #
+      # If tools/grader/reference/<file>.md is absent, grade_brief.py
+      # falls back to "indicative grading unavailable" (still exit 0).
+
+      - name: Install dependencies (+ LLM SDKs)
+        run: |
+          pip install -r requirements.txt
+          pip install anthropic openai
+
+      - name: Detect briefs to grade
+        id: detect
+        env:
+          OVERRIDE_BRIEF: ${{ github.event.inputs.brief_path }}
+        run: |
+          set -e
+          if [ -n "$OVERRIDE_BRIEF" ]; then
+            echo "$OVERRIDE_BRIEF" > /tmp/briefs.txt
+          else
+            BEFORE="${{ github.event.before }}"
+            if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              BEFORE="HEAD~1"
+            fi
+            git diff --name-only "${BEFORE}..${{ github.sha }}" 2>/dev/null \
+              | grep -E '^answers/S[0-9]{2}_executive_brief\.md$' \
+              > /tmp/briefs.txt || true
+          fi
+          echo "Briefs to grade:"; cat /tmp/briefs.txt || true
+
+      - name: Grade each brief
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          OPENAI_API_KEY:    ${{ secrets.OPENAI_API_KEY }}
+          GRADER_CACHE_DIR:  ${{ runner.temp }}/grader-cache
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          mkdir -p validation/results
+          : > validation/results/rubric_combined.md
+          while read -r brief; do
+            [ -z "$brief" ] && continue
+            echo "::group::Grading $brief"
+            python tools/grader/grade_brief.py --brief "$brief" || true
+            cat validation/results/rubric_report.md \
+              >> validation/results/rubric_combined.md || true
+            echo "" >> validation/results/rubric_combined.md
+            echo "::endgroup::"
+          done < /tmp/briefs.txt
+          if [ ! -s validation/results/rubric_combined.md ]; then
+            echo "_No executive brief changed in this PR; rubric skipped._" \
+              > validation/results/rubric_combined.md
+          fi
+
+      - name: Append to job summary
+        if: always()
+        run: cat validation/results/rubric_combined.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload rubric reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rubric-report
+          path: validation/results/rubric_*
+
+      # No PR comment — results are in the job summary and artifact above.
