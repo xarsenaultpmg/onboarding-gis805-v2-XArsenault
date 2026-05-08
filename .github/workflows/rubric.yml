@@ -41,7 +41,8 @@ permissions:
 jobs:
   rubric:
     name: rubric-advisory
-    if: vars.RUBRIC_ENABLED == 'true' || github.event_name == 'workflow_dispatch'
+    # Gate: enabled flag OR manual dispatch, AND not the upstream template repo.
+    if: ${{ (vars.RUBRIC_ENABLED == 'true' || github.event_name == 'workflow_dispatch') && !github.event.repository.is_template }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
