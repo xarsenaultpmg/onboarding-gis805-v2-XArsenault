@@ -11,11 +11,19 @@ permissions:
   contents: read
 
 jobs:
-  autograding:
-    name: Autograding
+  # --------------------------------------------------------------
+  # structural — assignment-aware checks that run on EVERY push.
+  # Blocks only on hard SQL parse errors. Missing artefacts and
+  # warehouse FAILs are coaching warnings (exit 0) so that purely
+  # textual sessions (e.g. S01) can commit freely.
+  # --------------------------------------------------------------
+  structural:
+    name: Structural checks (session-aware)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0           # need history for git diff
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,11 +33,15 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Generate data (if the student has not committed it)
-        run: python scripts/datagen/gen_all.py --team-seed $(python scripts/datagen/_compute_seed.py)
+      - name: Generate data (idempotent; skipped if cached)
+        run: |
+          python scripts/datagen/gen_all.py \
+            --team-seed $(python scripts/datagen/_compute_seed.py) || true
 
-      - name: Load pipeline
-        run: python src/run_pipeline.py
+      - name: Build warehouse (best-effort; warehouse_checks degrade if absent)
+        run: python src/run_pipeline.py || true
 
-      - name: Run validation checks (canonical)
-        run: python src/run_checks.py
+      - name: Run session-aware checks (push mode)
+        env:
+          GITHUB_EVENT_BEFORE: ${{ github.event.before }}
+        run: python src/run_session_checks.py --mode push
