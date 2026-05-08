@@ -1,27 +1,45 @@
 -- ============================================================
 -- checks.sql — Validation de l'entrepôt NexaMart
 -- ============================================================
--- Exécuté par : make check  /  .\run.ps1 check
+-- Exécuté par : make check  /  .\run.ps1 check (legacy, src/run_checks.py)
+--           ET : src/run_session_checks.py (subset par session via @rule)
 -- Produit : validation/results/check_results.txt
 --
 -- Convention : chaque check retourne check_type, detail, result (PASS/FAIL)
+--
+-- Annotations `-- @rule: <name>` : run_session_checks.py découpe ce fichier
+-- par marqueurs `@rule:` et n'exécute que les blocs dont le nom apparaît
+-- dans `warehouse_checks` du session_manifest.yaml. Ces commentaires sont
+-- ignorés par src/run_checks.py qui exécute toujours tout (legacy).
 -- ============================================================
 
+-- @rule: tables_exist
 -- ─────────────────────────────────────────────
 -- 1. Existence des tables clés
 -- ─────────────────────────────────────────────
-SELECT 'TABLE_EXISTS' AS check_type,
-       table_name     AS detail,
-       'PASS'         AS result
-FROM information_schema.tables
-WHERE table_schema = 'main'
-  AND table_name IN (
-      'dim_date','dim_product','dim_store','dim_customer','dim_channel',
-      'fact_sales','fact_returns','fact_budget',
-      'fact_daily_inventory','fact_order_pipeline',
-      'bridge_customer_segment','junk_order_profile','fact_promo_exposure'
-  );
+-- Bug fix (mai 2026) : l'ancienne version retournait 0 ligne quand
+-- AUCUNE table n'existait, ce qui silenciait totalement le check.
+-- On enumère explicitement la liste attendue via VALUES + LEFT JOIN
+-- pour qu'une table absente apparaisse en FAIL au lieu de disparaître.
+WITH expected(table_name) AS (
+    VALUES ('dim_date'), ('dim_product'), ('dim_store'),
+           ('dim_customer'), ('dim_channel'),
+           ('fact_sales'), ('fact_returns'), ('fact_budget'),
+           ('fact_daily_inventory'), ('fact_order_pipeline'),
+           ('bridge_customer_segment'), ('junk_order_profile'),
+           ('fact_promo_exposure')
+)
+SELECT 'TABLE_EXISTS'              AS check_type,
+       e.table_name                AS detail,
+       CASE WHEN i.table_name IS NULL
+            THEN 'FAIL -- table not present'
+            ELSE 'PASS' END         AS result
+FROM expected e
+LEFT JOIN information_schema.tables i
+       ON i.table_schema = 'main'
+      AND i.table_name = e.table_name;
 
+-- @rule: fact_sales_not_empty
 -- ─────────────────────────────────────────────
 -- 2. Tables non vides (cardinalité minimale)
 -- ─────────────────────────────────────────────
@@ -55,6 +73,7 @@ SELECT 'ROW_COUNT' AS check_type,
        CASE WHEN COUNT(*) >= 500 THEN 'PASS' ELSE 'FAIL -- expected >=500 rows' END AS result
 FROM fact_sales;
 
+-- @rule: dim_keys_unique
 -- ─────────────────────────────────────────────
 -- 3. Clés primaires uniques (dimensions)
 -- ─────────────────────────────────────────────
@@ -82,6 +101,7 @@ SELECT 'PK_UNIQUE' AS check_type,
             ELSE 'FAIL — duplicate channel_id' END AS result
 FROM dim_channel;
 
+-- @rule: dim_customer_pk_unique
 -- dim_customer : on vérifie la clé substitut (customer_key) car celle-ci
 -- reste unique quel que soit le SCD choisi. Sous Type 2, le customer_id
 -- natural peut apparaître plusieurs fois (une par version), donc on
@@ -93,6 +113,7 @@ SELECT 'PK_UNIQUE' AS check_type,
             ELSE 'FAIL — duplicate customer_key' END AS result
 FROM dim_customer;
 
+-- @rule: scd2_one_current
 -- Vérification SCD2 : au plus une version courante par customer_id.
 -- Si dim_customer est en Type 1, is_current n'existe pas -- le check
 -- est alors SKIP (table_exists catch dans run_checks.py).
@@ -107,6 +128,7 @@ FROM (
     GROUP BY customer_id
 ) t;
 
+-- @rule: fact_sales_no_null_fk
 -- ─────────────────────────────────────────────
 -- 4. FK NOT NULL dans fact_sales
 -- ─────────────────────────────────────────────
@@ -138,6 +160,7 @@ SELECT 'FK_NOT_NULL' AS check_type,
             ELSE 'FAIL — NULL channel_key found' END AS result
 FROM fact_sales;
 
+-- @rule: grain_unique_fact_sales
 -- ─────────────────────────────────────────────
 -- 5. Grain verification — fact_sales
 --    (order_number + sale_line_id should be unique)
@@ -148,6 +171,7 @@ SELECT 'GRAIN_UNIQUE' AS check_type,
             THEN 'PASS' ELSE 'FAIL — grain violation' END AS result
 FROM fact_sales;
 
+-- @rule: reconcile_sales_vs_budget
 -- ─────────────────────────────────────────────
 -- 6. Drill-across réconciliation (S06)
 --    Revenue in fact_sales vs budget target — sanity only
@@ -161,6 +185,7 @@ SELECT 'RECONCILE' AS check_type,
 FROM (SELECT SUM(line_total) AS total FROM fact_sales) s,
      (SELECT SUM(target_revenue) AS total FROM fact_budget) b;
 
+-- @rule: bridge_weights_sum_to_one
 -- ─────────────────────────────────────────────
 -- 7. Bridge weights sum to 1.0 per customer (S08)
 -- ─────────────────────────────────────────────
