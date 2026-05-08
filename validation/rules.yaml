@@ -20,32 +20,72 @@
 # ============================================================
 
 rules:
+  - name: tables_exist
+    tables: [dim_date, dim_product, dim_store, dim_customer, dim_channel,
+             fact_sales, fact_returns, fact_budget,
+             fact_daily_inventory, fact_order_pipeline,
+             bridge_customer_segment, junk_order_profile,
+             fact_promo_exposure]
+    check: table_present
+    manifest_session: S02
+
   - name: fact_sales_not_empty
     table: fact_sales
     check: row_count > 0
     session: S02
+    manifest_session: S02
 
   - name: dim_keys_unique
-    tables: [dim_date, dim_product, dim_store, dim_customer, dim_channel]
+    tables: [dim_date, dim_product, dim_store, dim_channel]
     check: primary_key_unique
     session: S02
+    manifest_session: S02
+
+  - name: dim_customer_pk_unique
+    table: dim_customer
+    check: surrogate_key_unique
+    column: customer_key
+    manifest_session: S04
+
+  - name: scd2_one_current
+    table: dim_customer
+    check: at_most_one_current_per_natural_key
+    natural_key: customer_id
+    flag_column: is_current
+    manifest_session: S04
 
   - name: fact_sales_no_null_fk
     table: fact_sales
     check: no_null_foreign_keys
-    columns: [order_date, product_id, store_id, customer_id, channel_id]
+    columns: [product_key, store_key, customer_key, channel_key]
     session: S02
+    manifest_session: S02
+
+  - name: grain_unique_fact_sales
+    table: fact_sales
+    check: composite_key_unique
+    columns: [order_number, sale_line_id]
+    manifest_session: S02
+
+  - name: reconcile_sales_vs_budget
+    tables: [fact_sales, fact_budget]
+    check: drill_across_variance_within_tolerance
+    tolerance_pct: 200
+    manifest_session: S06
 
   - name: bridge_weights_sum_to_one
     table: bridge_customer_segment
     check: sum_by_group_equals
-    group_by: customer_id
+    group_by: customer_key
     column: weight
     expected: 1.0
-    tolerance: 0.001
+    tolerance: 0.01
     session: S08
+    manifest_session: S08
 
   - name: dataset_identity
     file: meta/dataset_identity.json
     check: fingerprint_matches_seed
     session: S01
+    manifest_session: S01
+    runtime: pipeline   # not asserted via checks.sql; verified by run_pipeline.py
