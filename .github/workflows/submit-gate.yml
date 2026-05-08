@@ -16,7 +16,7 @@
 # Branches and PRs are NOT required.
 # ============================================================
 
-name: Submit Gate
+name: Remise
 
 on:
   push:
