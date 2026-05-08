@@ -42,6 +42,9 @@ permissions:
 jobs:
   structural-submit-gate:
     name: structural-submit-gate
+    # Skip on the upstream template repo: only student forks should
+    # ever evaluate a submission window.
+    if: ${{ !github.event.repository.is_template }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
