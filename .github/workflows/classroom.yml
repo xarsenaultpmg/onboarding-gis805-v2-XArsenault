@@ -19,6 +19,9 @@ jobs:
   # --------------------------------------------------------------
   structural:
     name: Structural checks (session-aware)
+    # Skip on the upstream template repo: instructor pushes here only
+    # publish updates to student forks; they should never trigger CI.
+    if: ${{ !github.event.repository.is_template }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
