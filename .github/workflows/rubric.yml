@@ -20,7 +20,7 @@
 # authoritative blocker.
 # ============================================================
 
-name: Rubric (advisory)
+name: Correction indicative
 
 on:
   push:
@@ -32,7 +32,7 @@ on:
   workflow_dispatch:
     inputs:
       brief_path:
-        description: "Path to the brief to grade (e.g. answers/S01_executive_brief.md)"
+        description: "Chemin vers la synthèse à corriger (ex. answers/S01_executive_brief.md)"
         required: false
 
 permissions:
