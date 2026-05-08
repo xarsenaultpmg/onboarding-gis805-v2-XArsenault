@@ -1,0 +1,315 @@
+# ============================================================
+# session_manifest.yaml — Assignment-aware CI manifest
+# ============================================================
+# Lu par : src/run_session_checks.py (push + submit modes) et
+# tools/grader/grade_brief.py (rubric agent).
+#
+# Pour chaque séance :
+#   - path_globs            : globs identifiant les fichiers qui
+#                             *appartiennent* à la séance. Un push qui
+#                             touche au moins un de ces chemins active
+#                             les checks de la séance.
+#   - required_artefacts    : fichiers qui DOIVENT exister et passer
+#                             min_bytes / must_contain_sections pour
+#                             qu'un PR vers submit/aX puisse merger.
+#                             En mode push : warn seulement.
+#   - sql_artefacts         : fichiers .sql qui DOIVENT contenir un
+#                             CREATE OR REPLACE (TABLE|VIEW) ciblé. Un
+#                             fichier présent mais syntactiquement
+#                             cassé bloque AUSSI en mode push.
+#   - warehouse_checks      : sous-ensemble de noms de règles
+#                             (validation/rules.yaml) à exécuter via
+#                             validation/checks.sql (sections marquées
+#                             `-- @rule: <name>`).
+#   - deadline              : ISO date — copie depuis docs/calendar.md.
+#                             Indicatif uniquement (jamais bloquant).
+#   - submission_window     : a1 | a2 | final | none — détermine quel
+#                             PR submit/* enforce les required_artefacts
+#                             de cette séance.
+#   - rubric                : config pour grade_brief.py (poids,
+#                             dimensions emphasées, brief de référence).
+# ============================================================
+
+version: "1.0"
+course: GIS805
+semester: "Été 2026"
+
+# Brief sections expected in every answers/SXX_executive_brief.md
+# (source: answers/README.md "Sections attendues").
+brief_required_sections: &brief_sections
+  - "Question du CEO"
+  - "Réponse exécutive"
+  - "Décisions de modélisation"
+  - "Preuve"
+  - "Validation"
+  - "Risques / limites"
+  - "Prochaine recommandation"
+
+sessions:
+
+  S01:
+    title: "NexaMart kickoff"
+    deadline: "2026-05-04"
+    submission_window: a1
+    path_globs:
+      - "answers/S01_executive_brief.md"
+    required_artefacts:
+      - path: "answers/S01_executive_brief.md"
+        min_bytes: 400
+        must_contain_sections: *brief_sections
+      - path: "ai-usage.md"
+        min_bytes: 50
+    sql_artefacts: []
+    warehouse_checks: []
+    rubric:
+      reference_brief_path: "tools/grader/reference/S01_executive_brief.md"
+      emphasis_dimensions: [problem_framing, communication]
+
+  S02:
+    title: "Schéma en étoile, grain et dimensions conformes"
+    deadline: "2026-05-07"
+    submission_window: a1
+    path_globs:
+      - "answers/S02_executive_brief.md"
+      - "sql/dims/dim_*.sql"
+      - "sql/facts/fact_sales.sql"
+      - "sql/staging/**/*.sql"
+    required_artefacts:
+      - path: "answers/S02_executive_brief.md"
+        min_bytes: 400
+        must_contain_sections: *brief_sections
+      - path: "sql/facts/fact_sales.sql"
+        min_bytes: 100
+    sql_artefacts:
+      - path: "sql/facts/fact_sales.sql"
+        must_create_object: "fact_sales"
+      - path: "sql/dims/dim_product.sql"
+        must_create_object: "dim_product"
+      - path: "sql/dims/dim_customer.sql"
+        must_create_object: "dim_customer"
+    warehouse_checks:
+      - fact_sales_not_empty
+      - dim_keys_unique
+      - fact_sales_no_null_fk
+      - grain_unique_fact_sales
+    rubric:
+      reference_brief_path: "tools/grader/reference/S02_executive_brief.md"
+      emphasis_dimensions: [model_quality, validation_quality]
+
+  S03:
+    title: "Dimensions à changement lent (SCD 1/2/3)"
+    deadline: "2026-05-11"
+    submission_window: a1
+    path_globs:
+      - "answers/S03_executive_brief.md"
+      - "sql/dims/dim_customer.sql"
+      - "sql/dims/dim_product.sql"
+    required_artefacts:
+      - path: "answers/S03_executive_brief.md"
+        min_bytes: 400
+        must_contain_sections: *brief_sections
+    sql_artefacts:
+      - path: "sql/dims/dim_customer.sql"
+        must_create_object: "dim_customer"
+    warehouse_checks:
+      - dim_customer_pk_unique
+      - scd2_one_current
+    rubric:
+      reference_brief_path: "tools/grader/reference/S03_executive_brief.md"
+      emphasis_dimensions: [model_quality]
+
+  S04:
+    title: "Panier d'achat et drapeaux : degenerate + junk dims"
+    deadline: "2026-05-14"
+    submission_window: a1
+    path_globs:
+      - "answers/S04_executive_brief.md"
+      - "sql/dims/junk_*.sql"
+      - "sql/facts/fact_sales.sql"
+    required_artefacts:
+      - path: "answers/S04_executive_brief.md"
+        min_bytes: 400
+        must_contain_sections: *brief_sections
+    sql_artefacts: []
+    warehouse_checks:
+      - grain_unique_fact_sales
+    rubric:
+      reference_brief_path: "tools/grader/reference/S04_executive_brief.md"
+      emphasis_dimensions: [model_quality]
+
+  S05:
+    title: "Examen intra 1"
+    deadline: "2026-05-21"
+    submission_window: none
+    path_globs: []
+    required_artefacts: []
+    sql_artefacts: []
+    warehouse_checks: []
+    rubric: null
+
+  S06:
+    title: "Multi-star et drill-across"
+    deadline: "2026-05-25"
+    submission_window: a2
+    path_globs:
+      - "answers/S06_executive_brief.md"
+      - "sql/facts/fact_budget.sql"
+      - "sql/facts/fact_returns.sql"
+      - "sql/views/*.sql"
+    required_artefacts:
+      - path: "answers/S06_executive_brief.md"
+        min_bytes: 400
+        must_contain_sections: *brief_sections
+    sql_artefacts:
+      - path: "sql/facts/fact_budget.sql"
+        must_create_object: "fact_budget"
+    warehouse_checks:
+      - reconcile_sales_vs_budget
+    rubric:
+      reference_brief_path: "tools/grader/reference/S06_executive_brief.md"
+      emphasis_dimensions: [model_quality, validation_quality]
+
+  S07:
+    title: "Dimensions spéciales (role-playing, hiérarchies, NULLs)"
+    deadline: "2026-05-28"
+    submission_window: a2
+    path_globs:
+      - "answers/S07_executive_brief.md"
+      - "sql/dims/dim_date.sql"
+    required_artefacts:
+      - path: "answers/S07_executive_brief.md"
+        min_bytes: 400
+        must_contain_sections: *brief_sections
+    sql_artefacts: []
+    warehouse_checks: []
+    rubric:
+      reference_brief_path: "tools/grader/reference/S07_executive_brief.md"
+      emphasis_dimensions: [model_quality]
+
+  S08:
+    title: "Ponts pondérés et SCD avancés"
+    deadline: "2026-06-01"
+    submission_window: a2
+    path_globs:
+      - "answers/S08_executive_brief.md"
+      - "sql/bridges/**/*.sql"
+      - "sql/dims/bridge_*.sql"
+    required_artefacts:
+      - path: "answers/S08_executive_brief.md"
+        min_bytes: 400
+        must_contain_sections: *brief_sections
+    sql_artefacts:
+      - path: "sql/bridges/bridge_customer_segment.sql"
+        must_create_object: "bridge_customer_segment"
+    warehouse_checks:
+      - bridge_weights_sum_to_one
+    rubric:
+      reference_brief_path: "tools/grader/reference/S08_executive_brief.md"
+      emphasis_dimensions: [model_quality, validation_quality]
+
+  S09:
+    title: "Quatre types de tables de faits"
+    deadline: "2026-06-04"
+    submission_window: a2
+    path_globs:
+      - "answers/S09_executive_brief.md"
+      - "sql/facts/fact_daily_inventory.sql"
+      - "sql/facts/fact_order_pipeline.sql"
+      - "sql/facts/fact_promo_exposure.sql"
+    required_artefacts:
+      - path: "answers/S09_executive_brief.md"
+        min_bytes: 400
+        must_contain_sections: *brief_sections
+    sql_artefacts: []
+    warehouse_checks: []
+    rubric:
+      reference_brief_path: "tools/grader/reference/S09_executive_brief.md"
+      emphasis_dimensions: [model_quality]
+
+  S10:
+    title: "Examen intra 2"
+    deadline: "2026-06-08"
+    submission_window: none
+    path_globs: []
+    required_artefacts: []
+    sql_artefacts: []
+    warehouse_checks: []
+    rubric: null
+
+  S11:
+    title: "Documentation et revue de design"
+    deadline: "2026-06-11"
+    submission_window: final
+    path_globs:
+      - "answers/S11_executive_brief.md"
+      - "docs/model-card.md"
+      - "docs/bus-matrix.md"
+      - "docs/data-dictionary.md"
+      - "docs/decision-log.md"
+      - "docs/metric-definitions.md"
+    required_artefacts:
+      - path: "answers/S11_executive_brief.md"
+        min_bytes: 400
+        must_contain_sections: *brief_sections
+      - path: "docs/model-card.md"
+        min_bytes: 500
+      - path: "docs/bus-matrix.md"
+        min_bytes: 200
+      - path: "docs/data-dictionary.md"
+        min_bytes: 200
+      - path: "docs/decision-log.md"
+        min_bytes: 200
+    sql_artefacts: []
+    warehouse_checks: []
+    rubric:
+      reference_brief_path: "tools/grader/reference/S11_executive_brief.md"
+      emphasis_dimensions: [communication, governance]
+
+  S12:
+    title: "Comité du board : présentation et défense"
+    deadline: "2026-06-15"
+    submission_window: final
+    path_globs:
+      - "answers/S12_executive_brief.md"
+      - "submissions/final/**"
+    required_artefacts:
+      - path: "answers/S12_executive_brief.md"
+        min_bytes: 400
+        must_contain_sections: *brief_sections
+    sql_artefacts: []
+    warehouse_checks: []
+    rubric:
+      reference_brief_path: "tools/grader/reference/S12_executive_brief.md"
+      emphasis_dimensions: [communication]
+
+  S13:
+    title: "Au-delà du modèle : survol GIS806"
+    deadline: "2026-06-18"
+    submission_window: final
+    path_globs:
+      - "answers/S13_executive_brief.md"
+    required_artefacts:
+      - path: "answers/S13_executive_brief.md"
+        min_bytes: 300
+    sql_artefacts: []
+    warehouse_checks: []
+    rubric:
+      reference_brief_path: "tools/grader/reference/S13_executive_brief.md"
+      emphasis_dimensions: [communication]
+
+# ============================================================
+# Submission windows (drives PR-merge gate)
+# ============================================================
+submission_windows:
+  a1:
+    sessions: [S01, S02, S03, S04]
+    deadline: "2026-05-14"
+    branch: "submit/a1"
+  a2:
+    sessions: [S06, S07, S08, S09]
+    deadline: "2026-06-04"
+    branch: "submit/a2"
+  final:
+    sessions: [S11, S12, S13]
+    deadline: "2026-06-15"
+    branch: "submit/final"
