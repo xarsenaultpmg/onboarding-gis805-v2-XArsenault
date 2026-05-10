@@ -1,5 +1,5 @@
 ============================================
-NexaMart Validation: 0 PASS, 0 FAIL, 16 SKIP
+NexaMart Validation: 0 PASS, 0 FAIL, 19 SKIP
 ============================================
 
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_date does not exist!
@@ -13,8 +13,11 @@ NexaMart Validation: 0 PASS, 0 FAIL, 16 SKIP
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_store does not exist!
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_channel does not exist!
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_customer does not exist!
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_customer does not exist!
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
+[SKIP]  ERROR            'utf-8' codec can't decode byte 0x94 in position 101: invalid start byte
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name bridge_customer_segment does not exist!

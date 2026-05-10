@@ -16,11 +16,15 @@
 
 ---
 
-### 2026-01-XX — Séance S00 *(exemple — supprimez cette entrée quand vous ajoutez les vôtres)*
-- **Modèle :** GitHub Copilot Chat
-- **Prompt :** « Qu'est-ce qui se trouve dans mon dépôt ? Explique-moi la structure du projet. »
-- **Résultat :** Copilot a listé les dossiers principaux (sql/, answers/, data/, docs/) et expliqué le rôle de chacun dans le contexte d'un entrepôt dimensionnel.
-- **Validation :** J'ai comparé la réponse avec le README.md et le contenu réel des dossiers — tout correspondait.
-- **Justification :** Première prise de contact avec le dépôt ; je voulais comprendre l'organisation avant de lancer les commandes.
+### 2026-05-10 — Séance S01
+- **Modèle :** Claude Sonnet 4.6
+- **Prompt :** « Aide-moi à remplir le document S01_executive_brief.md pour répondre à la question du CEO : quelles catégories déclinent dans quelles régions et pourquoi ? »
+- **Résultat :** Claude a guidé la rédaction de chaque section du brief : réponse exécutive, décisions de modélisation, preuve SQL, validation et risques. Il a aussi construit la requête SQL avec window function LAG pour identifier les déclins trimestriels.
+- **Validation :**
+  - J'ai roulé toutes les requêtes dans mon Codespace sur ma base `db/nexamart.duckdb` pour vérifier les résultats.
+  - J'ai validé la réconciliation des totaux (896 840.55 $ brut = 896 840.55 $ avec jointures).
+  - J'ai vérifié manuellement Québec/Home & Garden : seulement 5 transactions en Q2 — signal retiré des priorités CEO.
+  - J'ai confirmé que mes données ne couvrent que 2025, ce qui a justifié le choix d'une comparaison QoQ plutôt qu'YoY.
+- **Justification :** Claude a servi de co-équipier analytique pour structurer la démarche, construire les requêtes SQL et valider la cohérence des chiffres avant présentation au CEO. Toutes les décisions finales et la validation des résultats ont été faites par moi.
 
 <!-- Ajoutez vos entrées ci-dessous -->

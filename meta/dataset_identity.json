@@ -1,8 +1,8 @@
 {
-  "team_seed": 42,
+  "team_seed": 1006429623,
   "scenario_family": "NEXAMART_RETAIL_2026",
-  "n_products": 60,
-  "n_customers": 189,
-  "generated_at": "2026-04-19T17:03:36+00:00",
-  "fingerprint": "a028be017296ec80"
+  "n_products": 51,
+  "n_customers": 212,
+  "generated_at": "2026-05-06T01:01:11+00:00",
+  "fingerprint": "328ff47a22a34bd8"
 }
