@@ -1,7 +1,20 @@
-============================================
-NexaMart Validation: 0 PASS, 0 FAIL, 19 SKIP
-============================================
+=============================================
+NexaMart Validation: 0 PASS, 13 FAIL, 19 SKIP
+=============================================
 
+[FAIL]  TABLE_EXISTS     dim_date                                       FAIL -- table not present
+[FAIL]  TABLE_EXISTS     dim_product                                    FAIL -- table not present
+[FAIL]  TABLE_EXISTS     dim_store                                      FAIL -- table not present
+[FAIL]  TABLE_EXISTS     dim_customer                                   FAIL -- table not present
+[FAIL]  TABLE_EXISTS     dim_channel                                    FAIL -- table not present
+[FAIL]  TABLE_EXISTS     fact_sales                                     FAIL -- table not present
+[FAIL]  TABLE_EXISTS     fact_returns                                   FAIL -- table not present
+[FAIL]  TABLE_EXISTS     fact_budget                                    FAIL -- table not present
+[FAIL]  TABLE_EXISTS     fact_daily_inventory                           FAIL -- table not present
+[FAIL]  TABLE_EXISTS     fact_order_pipeline                            FAIL -- table not present
+[FAIL]  TABLE_EXISTS     bridge_customer_segment                        FAIL -- table not present
+[FAIL]  TABLE_EXISTS     junk_order_profile                             FAIL -- table not present
+[FAIL]  TABLE_EXISTS     fact_promo_exposure                            FAIL -- table not present
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_date does not exist!
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_product does not exist!
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_store does not exist!
@@ -19,5 +32,5 @@ NexaMart Validation: 0 PASS, 0 FAIL, 19 SKIP
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
-[SKIP]  ERROR            'utf-8' codec can't decode byte 0x94 in position 101: invalid start byte
+[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
 [SKIP]  MISSING_TABLE    Catalog Error: Table with name bridge_customer_segment does not exist!
