@@ -1,8 +1,10 @@
 # Rétroaction automatisée -- S01 (Diagnostic fondamental -- NexaMart kickoff)
 
-_Générée le 2026-05-14T22:23:35+00:00 -- Run `20260514T221333Z-7d34bf6a`_
+_Générée le 2026-05-15T12:36:02+00:00 -- Run `20260515T122624Z-00a5a04f`_
 
 Ce document est produit par un pipeline reproductible (vérification SQL déterministe + analyse LLM du brief et de la déclaration IA). Une revue humaine précède toujours sa publication. **À ce stade expérimental, aucune note ni étiquette de niveau n'est diffusée : l'objectif est purement formatif.**
+
+> ⚠️ **Avertissement instructeur (à retirer avant publication) :** cette analyse a été générée avec `--skip-pull`. Le contenu correspond au commit local et **n'est peut-être pas la dernière version poussée par l'étudiant·e**.
 
 ---
 
@@ -77,39 +79,38 @@ LIMIT 10;
 
 
 **Pistes :**
-> Votre `db/nexamart.duckdb` est absente ou vide ; la requête a été exécutée contre une **base de référence cohorte** (seed instructeur). Les chiffres retournés ne correspondent donc pas à vos propres données : reconstruisez votre base avec `python src/run_pipeline.py` (ou `.\run.ps1 load`) pour valider vos calculs sur votre seed personnel.
 > Tables référencées dans votre requête mais absentes de la base : `quarterly_sales`, `with_lag`.
 > Tables disponibles dans `db/nexamart.duckdb` : `raw_bridge_campaign_allocation`, `raw_bridge_customer_segment`, `raw_customer_changes`, `raw_customer_profile_bands`, `raw_customer_scd3_history`, `raw_dim_channel`, `raw_dim_customer`, `raw_dim_date`, `raw_dim_geography`, `raw_dim_product`, `raw_dim_segment_outrigger`, `raw_dim_store`, `raw_fact_budget`, `raw_fact_daily_inventory`, `raw_fact_inventory_snapshot`, `raw_fact_order_pipeline`, `raw_fact_orders_transaction`, `raw_fact_promo_exposure`, `raw_fact_returns`, `raw_fact_sales`.
 
 ## 2. Rétroaction pédagogique sur le brief
 
-> Bon diagnostic analytique avec requêtes et contrôles solides : les résultats QoQ et les signaux faibles sont bien présentés et accompagnés de recommandations pratiques. Il manque cependant une traçabilité de processus (commits, note IA) et des artefacts de reproduction pour rendre le livrable totalement industriel.
+> Très bon diagnostic : le modèle, les requêtes et les contrôles sont complets et la justification exécutive est pertinente. Il manque toutefois la traçabilité du processus (commits, note IA) et des instructions explicites de reproduction pour un coéquipier.
 
 ### Observations par dimension
 
 **Model quality**
-- Observation : Le brief déclare explicitement le grain «une ligne = une ligne de vente», liste dim_product, dim_store, dim_date et mesure line_total.
-- Piste d'amélioration : Justifier le choix de patterns SCD (ex. SCD Type 2 vs Type 1) et explicitement préciser le traitement des attributs qui changent (p. ex. category rename) pour garantir l'historisation.
+- Observation : Le brief précise le grain (« une ligne = une ligne de vente »), définit les dimensions (category via dim_produit, region via dim_store, dim_date) et propose la mesure line_total comme 'revenu net par ligne de vente'.
+- Piste d'amélioration : Ajouter une discussion explicite sur la stratégie SCD (type 2 vs type 1) et justifier le pattern choisi pour préserver l'historique des catégories.
 
 **Validation quality**
-- Observation : La requête SQL fournie calcule les ventes trimestrielles, utilise LAG pour QoQ et le brief inclut réconciliation des totaux et contrôles d'intégrité référentielle (0 orphelins).
-- Piste d'amélioration : Ajouter des checks explicites pour les NULLs et un test automatisé (make check) reproduisant la réconciliation afin que le contrôle soit exécutable par un pair.
+- Observation : Le livrable inclut une requête SQL reproduisible qui calcule les ventes trimestrielles, l'usage de LAG pour QoQ, et des contrôles de réconciliation et d'intégrité référentielle (écart 0 $, orphelins 0).
+- Piste d'amélioration : Documenter le traitement des cas limites dans la requête (p.ex. prev_quarter_sales = 0, NULLs) et ajouter un check automatisé 'make check' listé dans le README.
 
 **Executive justification**
-- Observation : La réponse exécutive résume les déclins principaux (ex. Québec/Home & Garden -87% Q2) et propose recommandations court/moyen/long terme actionnables pour le CEO.
-- Piste d'amélioration : Synthétiser encore davantage en une phrase de décision claire («Approuvez l'investigation X et la construction du schéma en étoile S02»), et ajouter l'impact business estimé si possible.
+- Observation : La section 'Réponse exécutive' résume les déclins clés (ex. Québec/Home & Garden -87% Q2) et conclut que certains signaux sont statistiquement fragiles, avec recommandations opérationnelles et priorités court/moyen/long terme.
+- Piste d'amélioration : Formuler une décision claire à demander au CEO (p.ex. valider investigation prioritaire pour les 3 combinaisons région/catégorie listées) et préciser le seuil décisionnel utilisé.
 
 **Process trace**
-- Observation : Aucune trace de commits git, ni note sur l'usage d'IA ou journal de décisions n'est fournie dans le brief.
-- Piste d'amélioration : Inclure un journal de commits (≥3 commits incrémentaux) avec messages et une courte note IA précisant outil, prompt et validation humaine.
+- Observation : Le brief ne contient aucune trace de commits git, ni note sur l'usage d'IA ou journal de décisions.
+- Piste d'amélioration : Inclure un bref historique de commits (≥3) avec messages, et une note IA indiquant outils utilisés + validation humaine.
 
 **Reproducibility**
-- Observation : Le brief contient SQL et tableaux de contrôle, mais il n'y a pas de README/chemins ni script 'make check' explicitement fournis pour exécuter la reproduction sur un clone propre.
-- Piste d'amélioration : Ajouter un README pas-à-pas et un script check (ex. make check) sans chemins codés en dur pour permettre à un collègue de reproduire les résultats en <5 minutes.
+- Observation : Le SQL et les résultats sont fournis dans le brief, mais il manque des instructions de reproduction (README, commandes DuckDB/Make, ou chemins relatifs).
+- Piste d'amélioration : Ajouter un README minimal avec étapes 'clone → ouvrir DuckDB / run sql → make check' et exemples de commandes pour reproduire les checks en <5 minutes.
 
 ## 3. Déclaration d'utilisation de l'IA
 
-> La déclaration est complète et contient des éléments concrets (outil + version, étapes d'utilisation, validation concrète et limites des données). Rien n'indique l'utilisation d'expressions interdites ; la documentation est suffisamment précise pour l'évaluation.
+> La déclaration est complète et documente l'outil (avec version), le rôle joué par l'IA, les vérifications humaines et des limites de données. Bon niveau de détail; continuez d'être aussi précis pour les prochaines séances.
 
 **Sujets bien couverts dans votre déclaration :**
 
@@ -126,11 +127,11 @@ LIMIT 10;
 
 ## 5. Traçabilité
 
-- **Run ID :** `20260514T221333Z-7d34bf6a`
+- **Run ID :** `20260515T122624Z-00a5a04f`
 - **Devoir :** `S01`
 - **Étudiant·e :** `XArsenault`
-- **Commit analysé :** `8c7e398`
-- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260514T221333Z-7d34bf6a/XArsenault/`
+- **Commit analysé :** `d6c610c`
+- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260515T122624Z-00a5a04f/XArsenault/`
 - **Prompts (SHA-256) :**
   - `sql_extractor_system` : `90ee9e277de7a27f...`
   - `rubric_grader_system` : `505f32d1d8319d66...`
