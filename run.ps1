@@ -11,11 +11,17 @@
     .\run.ps1 load
     .\run.ps1 check
     .\run.ps1 clean
+    .\run.ps1 sql sql\analysis\s02-first-answer.sql
+    .\run.ps1 sql -SqlFile sql\analysis\s02-first-answer.sql
 #>
 param(
     [Parameter(Position = 0, Mandatory = $false)]
-    [ValidateSet("help", "generate", "load", "check", "clean", "reset")]
-    [string]$Target = "help"
+    [ValidateSet("help", "generate", "load", "check", "clean", "reset", "sql")]
+    [string]$Target = "help",
+
+    # Deuxième argument positionnel pour la cible sql (obligatoire avec sql).
+    [Parameter(Position = 1, Mandatory = $false)]
+    [string]$SqlFile = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -43,6 +49,7 @@ switch ($Target) {
         Write-Host "  .\run.ps1 generate  Generer vos CSVs (deterministe via team seed)"
         Write-Host "  .\run.ps1 load      Charger CSVs + executer sql/staging,dims,facts,bridges/"
         Write-Host "  .\run.ps1 check     Lancer validation/checks.sql -> PASS / FAIL / SKIP"
+        Write-Host "  .\run.ps1 sql <fichier.sql>  Executer un SQL (ex: .\run.ps1 sql sql\analysis\s02-first-answer.sql)"
         Write-Host "  .\run.ps1 reset     Supprimer uniquement le .duckdb (garde les CSVs)"
         Write-Host "  .\run.ps1 clean     Tout supprimer (DB + CSVs + resultats)"
         Write-Host "  .\run.ps1 help      Afficher cette aide (par defaut)`n"
@@ -67,6 +74,18 @@ switch ($Target) {
         Write-Host "`n-- Validating warehouse integrity --`n"
         & python src/run_checks.py
         if ($LASTEXITCODE -ne 0) { throw "Some checks failed. See validation\results\check_results.txt" }
+    }
+
+    "sql" {
+        if ([string]::IsNullOrWhiteSpace($SqlFile)) {
+            Write-Host "Usage: .\run.ps1 sql <chemin-vers-fichier.sql>"
+            Write-Host "  Exemple: .\run.ps1 sql sql\analysis\s02-first-answer.sql"
+            Write-Host "  Ou bien: .\run.ps1 sql -SqlFile sql\analysis\s02-first-answer.sql"
+            exit 1
+        }
+        Write-Host "`n-- Running SQL: $SqlFile --`n"
+        & python scripts/run_sql.py $SqlFile
+        if ($LASTEXITCODE -ne 0) { throw "run_sql.py failed (exit $LASTEXITCODE)" }
     }
 
     "reset" {

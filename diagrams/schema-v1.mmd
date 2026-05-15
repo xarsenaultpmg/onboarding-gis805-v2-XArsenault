@@ -1,0 +1,64 @@
+%% Étoile NexaMart S02 — lab GIS805-02 / s02-sample-brief
+%% Cinq dimensions : date, product, store, customer, channel
+%% FK fait : product_key, customer_key, store_key, date_key, channel_key
+%% Dégénérée : order_number (+ sale_line_id pour le grain)
+
+erDiagram
+    DIM_DATE ||--o{ FACT_SALES : "date_commande"
+    DIM_PRODUCT ||--o{ FACT_SALES : "produit"
+    DIM_STORE ||--o{ FACT_SALES : "magasin"
+    DIM_CUSTOMER ||--o{ FACT_SALES : "client"
+    DIM_CHANNEL ||--o{ FACT_SALES : "canal"
+
+    FACT_SALES {
+        bigint product_key
+        bigint customer_key
+        bigint store_key
+        bigint date_key
+        bigint channel_key
+        string sale_line_id
+        string order_number
+        double revenue
+        int quantity
+        double discount_amount
+        double cost
+    }
+
+    DIM_DATE {
+        bigint date_key
+        date date
+        int month
+        int quarter
+        int year
+    }
+
+    DIM_PRODUCT {
+        bigint product_key
+        string name
+        string category
+        string subcategory
+        string brand
+    }
+
+    DIM_STORE {
+        bigint store_key
+        string name
+        string city
+        string region_label
+        string province
+    }
+
+    DIM_CUSTOMER {
+        bigint customer_key
+        string name
+        string segment
+        string city
+        string region_label
+    }
+
+    DIM_CHANNEL {
+        bigint channel_key
+        string channel_id
+        string channel_name
+        string channel_type
+    }
