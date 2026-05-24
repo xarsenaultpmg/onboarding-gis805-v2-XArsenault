@@ -45,4 +45,16 @@
 - **Validation :** `.\run.ps1 load` puis `.\run.ps1 check` ; `.\run.ps1 sql sql\analysis\s02-first-answer.sql`.
 - **Justification :** Aligner le dépôt sur GIS805-02 et `s02-sample-brief.md` après écart avec une variante « diapo order_key ».
 
+### 2026-05-21 — Séance S03
+- **Modèle :** Claude Sonnet 4.6
+- **Prompt :** « Aide-moi à livrer la séance S03 : quels changements dans nos dimensions doivent garder la vérité historique, et lesquels peuvent être écrasés ? Je dois montrer au VP pourquoi l’ancien rapport était trompeur, rédiger la politique SCD, et prouver la différence entre Type 1 et Type 2 avec du SQL sur mes données NexaMart. »
+- **Résultat :** Claude a guidé la rédaction du brief exécutif (réponse au CEO, décisions de modélisation, risques), de la politique SCD par attribut dans `docs/scd-policy.md`, et du brief conseil. Il a aidé à construire la démo `sql/scd/type1_vs_type2_demo.sql` (rapport trompeur vs correct par segment) et à historiser `dim_customer` / `dim_store` avec `valid_from`, `valid_to` et `is_current`, ainsi que les jointures temporelles dans `fact_sales`.
+- **Validation :**
+  - J’ai roulé `.\run.ps1 generate`, `.\run.ps1 load` et les requêtes de démo sur `db/nexamart.duckdb` pour vérifier les chiffres du brief.
+  - J’ai confirmé le check `scd2_one_current` (PASS) et que `dim_customer` passe de 285 à 443 lignes après historisation — cohérent avec les événements de `raw_customer_changes`.
+  - J’ai vérifié l’exemple **CUS-00152** : 5 527,41 $ identiques, mais segment **Inactive** (Type 2, juste) vs **New** (Type 1, faux) — retenu comme illustration principale dans le brief.
+  - J’ai validé l’écart agrégé sur le segment **Gold** (129,78 $) entre les deux rapports, pour montrer que l’erreur n’est pas seulement théorique.
+  - J’ai relu `docs/scd-policy.md` et les sections exécutives pour m’assurer que les justifications restent en langage d’affaires (segment, région, moment de la vente), pas en jargon technique.
+- **Justification :** Claude a servi de co-équipier pour structurer la politique SCD, formuler l’argument VP (« pourquoi l’historique était faux ») et accélérer le SQL de preuve. Le choix Type 1 vs Type 2 par attribut, l’exemple client retenu et la validation des montants ont été faits par moi.
+
 <!-- Ajoutez vos entrées ci-dessous -->

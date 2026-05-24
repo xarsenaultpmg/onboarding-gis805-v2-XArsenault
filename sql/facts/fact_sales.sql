@@ -26,10 +26,14 @@ SELECT
 FROM raw_fact_sales AS f
 INNER JOIN dim_customer AS c
     ON f.customer_id = c.customer_id
+   AND CAST(f.order_date AS DATE) >= c.valid_from
+   AND (c.valid_to IS NULL OR CAST(f.order_date AS DATE) < c.valid_to)
 INNER JOIN dim_product AS p
     ON f.product_id = p.product_id
 INNER JOIN dim_store AS s
     ON f.store_id = s.store_id
+   AND CAST(f.order_date AS DATE) >= s.valid_from
+   AND (s.valid_to IS NULL OR CAST(f.order_date AS DATE) < s.valid_to)
 INNER JOIN dim_channel AS ch
     ON f.channel_id = ch.channel_id
 INNER JOIN dim_date AS d

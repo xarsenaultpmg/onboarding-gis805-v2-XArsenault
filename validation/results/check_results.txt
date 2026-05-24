@@ -1,5 +1,5 @@
 ============================================
-NexaMart Validation: 22 PASS, 7 FAIL, 3 SKIP
+NexaMart Validation: 21 PASS, 9 FAIL, 2 SKIP
 ============================================
 
 [PASS]  TABLE_EXISTS     dim_date                                       PASS
@@ -17,16 +17,16 @@ NexaMart Validation: 22 PASS, 7 FAIL, 3 SKIP
 [FAIL]  TABLE_EXISTS     fact_promo_exposure                            FAIL -- table not present
 [PASS]  ROW_COUNT        dim_date                                       PASS
 [PASS]  ROW_COUNT        dim_product                                    PASS
-[PASS]  ROW_COUNT        dim_store                                      PASS
+[FAIL]  ROW_COUNT        dim_store                                      FAIL -- expected 10 rows
 [PASS]  ROW_COUNT        dim_channel                                    PASS
 [PASS]  ROW_COUNT        dim_customer                                   PASS
 [PASS]  ROW_COUNT        fact_sales                                     PASS
 [PASS]  PK_UNIQUE        dim_date.date_key                              PASS
 [PASS]  PK_UNIQUE        dim_product.product_id                         PASS
-[PASS]  PK_UNIQUE        dim_store.store_id                             PASS
+[FAIL]  PK_UNIQUE        dim_store.store_id                             FAIL — duplicate store_id
 [PASS]  PK_UNIQUE        dim_channel.channel_id                         PASS
 [PASS]  PK_UNIQUE        dim_customer.customer_key                      PASS
-[SKIP]  ERROR            Binder Error: Referenced column "is_current" not found in FROM clause!
+[PASS]  SCD2_ONE_CURRENT  dim_customer one is_current per customer_id    PASS
 [PASS]  FK_NOT_NULL      fact_sales.product_key                         PASS
 [PASS]  FK_NOT_NULL      fact_sales.store_key                           PASS
 [PASS]  FK_NOT_NULL      fact_sales.customer_key                        PASS
