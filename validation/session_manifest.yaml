@@ -67,18 +67,31 @@ sessions:
 
   S02:
     title: "Schéma en étoile, grain et dimensions conformes"
-    deadline: "2026-05-07"
+    deadline: "2026-05-21"
     submission_window: a1
     path_globs:
       - "answers/S02_executive_brief.md"
       - "sql/dims/dim_*.sql"
       - "sql/facts/fact_sales.sql"
       - "sql/staging/**/*.sql"
+      - "sql/analysis/**/*.sql"
     required_artefacts:
       - path: "answers/S02_executive_brief.md"
         min_bytes: 400
         must_contain_sections: *brief_sections
+      - path: "sql/dims/dim_product.sql"
+        min_bytes: 100
+      - path: "sql/dims/dim_customer.sql"
+        min_bytes: 100
+      - path: "sql/dims/dim_store.sql"
+        min_bytes: 100
+      - path: "sql/dims/dim_date.sql"
+        min_bytes: 100
+      - path: "sql/dims/dim_channel.sql"
+        min_bytes: 100
       - path: "sql/facts/fact_sales.sql"
+        min_bytes: 100
+      - path: "sql/analysis/s02-ceo-answer.sql"
         min_bytes: 100
     sql_artefacts:
       - path: "sql/facts/fact_sales.sql"
@@ -87,6 +100,12 @@ sessions:
         must_create_object: "dim_product"
       - path: "sql/dims/dim_customer.sql"
         must_create_object: "dim_customer"
+      - path: "sql/dims/dim_store.sql"
+        must_create_object: "dim_store"
+      - path: "sql/dims/dim_date.sql"
+        must_create_object: "dim_date"
+      - path: "sql/dims/dim_channel.sql"
+        must_create_object: "dim_channel"
     warehouse_checks:
       - fact_sales_not_empty
       - dim_keys_unique
@@ -120,11 +139,11 @@ sessions:
 
   S04:
     title: "Panier d'achat et drapeaux : degenerate + junk dims"
-    deadline: "2026-05-14"
+    deadline: "2026-05-25"
     submission_window: a1
     path_globs:
       - "answers/S04_executive_brief.md"
-      - "sql/dims/junk_*.sql"
+      - "sql/dims/dim_order_profile.sql"
       - "sql/facts/fact_sales.sql"
     required_artefacts:
       - path: "answers/S04_executive_brief.md"
@@ -139,7 +158,7 @@ sessions:
 
   S05:
     title: "Examen intra 1"
-    deadline: "2026-05-21"
+    deadline: "2026-05-28"
     submission_window: none
     path_globs: []
     required_artefacts: []
@@ -149,7 +168,7 @@ sessions:
 
   S06:
     title: "Multi-star et drill-across"
-    deadline: "2026-05-25"
+    deadline: "2026-06-01"
     submission_window: a2
     path_globs:
       - "answers/S06_executive_brief.md"

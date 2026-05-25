@@ -24,7 +24,7 @@ rules:
     tables: [dim_date, dim_product, dim_store, dim_customer, dim_channel,
              fact_sales, fact_returns, fact_budget,
              fact_daily_inventory, fact_order_pipeline,
-             bridge_customer_segment, junk_order_profile,
+             dim_order_profile,
              fact_promo_exposure]
     check: table_present
     manifest_session: S02
