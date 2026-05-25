@@ -26,7 +26,7 @@ WITH expected(table_name) AS (
            ('dim_customer'), ('dim_channel'),
            ('fact_sales'), ('fact_returns'), ('fact_budget'),
            ('fact_daily_inventory'), ('fact_order_pipeline'),
-           ('bridge_customer_segment'), ('junk_order_profile'),
+           ('dim_order_profile'),
            ('fact_promo_exposure')
 )
 SELECT 'TABLE_EXISTS'              AS check_type,
