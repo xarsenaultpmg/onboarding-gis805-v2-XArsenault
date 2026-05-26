@@ -57,4 +57,15 @@
   - J’ai relu `docs/scd-policy.md` et les sections exécutives pour m’assurer que les justifications restent en langage d’affaires (segment, région, moment de la vente), pas en jargon technique.
 - **Justification :** Claude a servi de co-équipier pour structurer la politique SCD, formuler l’argument VP (« pourquoi l’historique était faux ») et accélérer le SQL de preuve. Le choix Type 1 vs Type 2 par attribut, l’exemple client retenu et la validation des montants ont été faits par moi.
 
+### 2026-05-25 — Séance S04
+- **Modèle :** Cursor / agent (Claude)
+- **Prompt :** « Implémenter le plan Lab GIS805-04 : junk dimension dim_order_profile, profile_key dans fact_sales, basket_pairs.sql, docs schema-v2/profiles/board brief, S04_executive_brief, 5 commits atomiques. »
+- **Résultat :** Création de `sql/dims/dim_order_profile.sql` (CASE pour profils VP), enrichissement de `fact_sales` via `raw_orders`, requête `basket_pairs.sql`, documentation et brief exécutif avec chiffres du seed d’équipe.
+- **Validation :**
+  - `.\run.ps1 generate`, `.\run.ps1 load`, `.\run.ps1 check` — `dim_order_profile` présent, grain fact_sales PASS.
+  - Vérifié **99** combinaisons observées vs **256** théoriques ; fréquences recopiées dans `docs/profiles.md` depuis requête sur `raw_orders`.
+  - Exécuté `basket_pairs.sql` : top paires à 9 co-occurrences ; revenus par profil contrôlés manuellement pour les 3 premiers libellés.
+  - Relu les noms de profils (« Commande standard », « Promo fidélité », etc.) pour lisibilité VP.
+- **Justification :** Accélérer la construction SQL et la doc tout en validant chaque chiffre du brief sur `db/nexamart.duckdb` local ; les choix de nommage et la priorisation des recommandations VP restent ma responsabilité.
+
 <!-- Ajoutez vos entrées ci-dessous -->
