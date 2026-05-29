@@ -1,10 +1,8 @@
 # Rétroaction automatisée -- S03 (Dimensions à changement lent : garder la vérité historique chez NexaMart)
 
-_Générée le 2026-05-29T00:25:32+00:00 -- Run `20260529T002510Z-9cdeddd0`_
+_Générée le 2026-05-29T00:56:53+00:00 -- Run `20260529T004953Z-f2a5f6ff`_
 
 Ce document est produit par un pipeline reproductible (validation automatique du livrable + analyse LLM du brief et de la déclaration IA). Une revue humaine précède toujours sa publication. **À ce stade expérimental, aucune note ni étiquette de niveau n'est diffusée : l'objectif est purement formatif.**
-
-> ⚠️ **Avertissement instructeur (à retirer avant publication) :** cette analyse a été générée avec `--skip-pull`. Le contenu correspond au commit local et **n'est peut-être pas la dernière version poussée par l'étudiant·e**.
 
 ---
 
@@ -35,33 +33,33 @@ ORDER BY revenue DESC
 
 ## 2. Rétroaction pédagogique sur le brief
 
-> Le brief répond clairement à la question CEO : politique SCD bien justifiée, preuves chiffrées et requêtes de validation exécutées. Améliorer la traçabilité (commits, note IA) et fournir un README de reproduction pour faciliter la production et la revue.
+> Très bon brief : la politique SCD est claire, la preuve chiffrée est fournie et la recommandation est actionnable. Améliorez la traçabilité des décisions (commits, note IA) et ajoutez contrôles de cas limites pour renforcer la reproductibilité.
 
 ### Observations par dimension
 
 **Model quality**
-- Observation : La note explique clairement l'adoption de SCD Type 2 pour segment, city et région, la création de clés de version (customer_key) et l'usage de valid_from/valid_to pour joindre les faits à la date de commande.
-- Piste d'amélioration : Préciser le grain exact des faits (niveau ligne/commande/transaction) et montrer un diagramme simple du schéma dim_customer + fact_sales pour faciliter la revue technique.
+- Observation : La note indique clairement SCD Type 2 pour segment, city, région et Type 1 pour corrections, avec clé substitut customer_key et jointure par valid_from/valid_to.
+- Piste d'amélioration : Inclure un diagramme de schéma (DDL simplifié) montrant les colonnes de dim_customer et les clés pour faciliter la revue technique.
 
 **Validation quality**
-- Observation : La section Validation liste des contrôles PASS (une version courante, clé unique, grain fact_sales) et référence le script sql/scd/type1_vs_type2_demo.sql exécuté sur db/nexamart.duckdb.
-- Piste d'amélioration : Ajouter une vérification explicite des NULLs et des bornes par date (tests pour orders aux dates limites) et inclure les résultats chiffrés des scripts d'assertion.
+- Observation : Le brief fournit des scripts référencés (sql/scd/type1_vs_type2_demo.sql), des résultats chiffrés (écart 129,78 $) et une table de contrôles indiquant PASS pour plusieurs vérifications.
+- Piste d'amélioration : Ajouter un contrôle explicite des cas limites (NULLs, périodes chevauchantes, et SUM(weights)=1) et un extrait de sortie SQL montrant ces cas traités.
 
 **Executive justification**
-- Observation : La Réponse exécutive indique que le Type 1 fausse les rapports et fournit des chiffres d'impact (129,78 $ et 5 527,41 $ pour CUS-00152) avec une recommandation claire d'appliquer SCD2.
-- Piste d'amélioration : Condensez la recommandation en une action opérationnelle priorisée (ex. échéancier et propriétaire pour industrialisation S03→S04).
+- Observation : La section 'Réponse exécutive' répond à la question CEO en langage d'affaires, montre l'impact chiffré et propose une recommandation claire (geler la politique SCD et industrialiser les changements).
+- Piste d'amélioration : Synthétiser en une phrase-action priorisée (ex. : 'Appliquer SCD2 pour clients et magasins d'ici la prochaine release') et préciser l'impact attendu sur KPI clés.
 
 **Process trace**
-- Observation : Le brief référence des fichiers (docs/scd-policy.md, sql/...) et la base db/nexamart.duckdb mais n'indique pas d'historique de commits ni de note IA détaillée.
-- Piste d'amélioration : Fournir l'historique git avec ≥3 commits significatifs et une note IA décrivant l'outil utilisé et comment les sorties ont été validées manuellement.
+- Observation : Le brief réfère des documents et scripts (docs/scd-policy.md, sql/...), mais n'indique pas d'historique git ni de note IA détaillée ni de logs de décisions incrémentaux.
+- Piste d'amélioration : Ajouter un journal de décisions (CHANGELOG) avec ≥3 commits et un encart 'usage IA' précisant outils, prompts et validations humaines.
 
 **Reproducibility**
-- Observation : Les chemins vers scripts et la base (db/nexamart.duckdb) et le seed mentionné facilitent la reproduction, mais aucun README d'exécution n'est cité.
-- Piste d'amélioration : Ajouter un README 'Reproduce.md' avec étapes exactes (commande DuckDB, seed, chemins relatifs) pour exécuter les scripts en moins de 5 minutes.
+- Observation : Indication du fichier de base de données (db/nexamart.duckdb), seed utilisé et chemins vers les scripts SQL pour reproduire la démonstration.
+- Piste d'amélioration : Fournir un README pas-à-pas 'clone → seed → run' et supprimer chemins codés en dur pour atteindre l'exécution en <5 minutes sur un clone propre.
 
 ## 3. Déclaration d'utilisation de l'IA
 
-> La déclaration est complète et fournit des preuves concrètes pour chaque point requis (outil nommé et version, étape d'utilisation, validation humaine et limite identifiée). Pensez à conserver ce niveau de détail pour chaque séance future et, si possible, ajoutez la date et l'heure pour faciliter la traçabilité.
+> La déclaration est complète et fournit des preuves concrètes (modèles nommés avec version, étapes d'utilisation, validations exécutées et limites observées). Continuez à conserver ce niveau de détail pour chaque future séance, en ajoutant si possible une brève note sur les paramètres ou prompts sensibles modifiés entre itérations.
 
 **Sujets bien couverts dans votre déclaration :**
 
@@ -78,12 +76,13 @@ ORDER BY revenue DESC
 
 ## 5. Traçabilité
 
-- **Run ID :** `20260529T002510Z-9cdeddd0`
+- **Run ID :** `20260529T004953Z-f2a5f6ff`
 - **Devoir :** `S03`
 - **Étudiant·e :** `XArsenault`
 - **Commit analysé :** `a634588`
-- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260529T002510Z-9cdeddd0/XArsenault/`
+- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260529T004953Z-f2a5f6ff/XArsenault/`
 - **Prompts (SHA-256) :**
+  - `sql_extractor_system` : `90ee9e277de7a27f...`
   - `rubric_grader_system` : `505f32d1d8319d66...`
   - `ai_usage_grader_system` : `81cb7fdf89bda55a...`
 - **Fournisseur (rubrique) :** `openai`
