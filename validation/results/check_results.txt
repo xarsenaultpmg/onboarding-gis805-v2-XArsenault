@@ -1,5 +1,5 @@
 ============================================
-NexaMart Validation: 21 PASS, 9 FAIL, 2 SKIP
+NexaMart Validation: 24 PASS, 5 FAIL, 2 SKIP
 ============================================
 
 [PASS]  TABLE_EXISTS     dim_date                                       PASS
@@ -8,22 +8,21 @@ NexaMart Validation: 21 PASS, 9 FAIL, 2 SKIP
 [PASS]  TABLE_EXISTS     dim_customer                                   PASS
 [PASS]  TABLE_EXISTS     dim_channel                                    PASS
 [PASS]  TABLE_EXISTS     fact_sales                                     PASS
+[PASS]  TABLE_EXISTS     dim_order_profile                              PASS
 [FAIL]  TABLE_EXISTS     fact_returns                                   FAIL -- table not present
 [FAIL]  TABLE_EXISTS     fact_budget                                    FAIL -- table not present
 [FAIL]  TABLE_EXISTS     fact_daily_inventory                           FAIL -- table not present
 [FAIL]  TABLE_EXISTS     fact_order_pipeline                            FAIL -- table not present
-[FAIL]  TABLE_EXISTS     bridge_customer_segment                        FAIL -- table not present
-[FAIL]  TABLE_EXISTS     junk_order_profile                             FAIL -- table not present
 [FAIL]  TABLE_EXISTS     fact_promo_exposure                            FAIL -- table not present
 [PASS]  ROW_COUNT        dim_date                                       PASS
 [PASS]  ROW_COUNT        dim_product                                    PASS
-[FAIL]  ROW_COUNT        dim_store                                      FAIL -- expected 10 rows
+[PASS]  ROW_COUNT        dim_store                                      PASS
 [PASS]  ROW_COUNT        dim_channel                                    PASS
 [PASS]  ROW_COUNT        dim_customer                                   PASS
 [PASS]  ROW_COUNT        fact_sales                                     PASS
 [PASS]  PK_UNIQUE        dim_date.date_key                              PASS
 [PASS]  PK_UNIQUE        dim_product.product_id                         PASS
-[FAIL]  PK_UNIQUE        dim_store.store_id                             FAIL — duplicate store_id
+[PASS]  PK_UNIQUE        dim_store.store_id                             PASS
 [PASS]  PK_UNIQUE        dim_channel.channel_id                         PASS
 [PASS]  PK_UNIQUE        dim_customer.customer_key                      PASS
 [PASS]  SCD2_ONE_CURRENT  dim_customer one is_current per customer_id    PASS
