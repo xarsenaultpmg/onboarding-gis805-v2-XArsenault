@@ -1,6 +1,6 @@
 # Rétroaction automatisée -- S04 (Panier d'achat et drapeaux : les patterns que l'étoile simple ne couvre pas)
 
-_Générée le 2026-05-29T00:09:41+00:00 -- Run `20260529T000917Z-46f8532c`_
+_Générée le 2026-05-29T00:20:20+00:00 -- Run `20260529T001953Z-efa55432`_
 
 Ce document est produit par un pipeline reproductible (validation automatique du livrable + analyse LLM du brief et de la déclaration IA). Une revue humaine précède toujours sa publication. **À ce stade expérimental, aucune note ni étiquette de niveau n'est diffusée : l'objectif est purement formatif.**
 
@@ -37,61 +37,54 @@ LIMIT 8;
 
 ## 2. Rétroaction pédagogique sur le brief
 
-> Très bon brief: modèle solide, validations reproductibles et recommandations métiers claires qui répondent à la question CEO. Compléter la traçabilité (commits et déclaration d'usage IA) et préciser KPI du pilote pour faciliter la prise de décision.
+> Très bon brief : modèle bien conçu et justifié, validations et recommandations opérationnelles claires pour le VP. Améliorer la traçabilité Git et ajouter petits KPI/tests de stabilité pour faciliter le passage en production.
 
 ### Observations par dimension
 
 **Model quality**
-- Observation : Le brief définit une junk dimension dim_order_profile avec 8 flags consolidés, indique le grain (order_number dégénéré) et justifie le choix par le fait que 99 profils observés sur 256 combinaisons théoriques.
-- Piste d'amélioration : Ajouter un exemple de schéma (liste des colonnes de dim_order_profile et types) et expliciter une contrainte d'unicité pour profile_key.
+- Observation : Le brief décrit clairement une junk dimension dim_order_profile (8 flags consolidés, profils nommés) et justifie le grain en gardant order_number comme dimension dégénérée.
+- Piste d'amélioration : Ajouter un diagramme simple (schéma fact/dim) montrant keys et cardinalités pour clarifier l'usage opérationnel des profils.
 
 **Validation quality**
-- Observation : Le document inclut des requêtes SQL de validation, des contrôles PASS (grain unique: 3 000 lignes, TABLE_EXISTS) et la couverture profile_key documentée (755/934 ≈ 81%).
-- Piste d'amélioration : Ajouter un test SQL pour les cas limites (NULL profile_key impact sur ratios) et une vérification des doublons dans la junk dim.
+- Observation : Le document inclut des requêtes SQL de preuve, des checks (grain_unique_fact_sales PASS) et des métriques de couverture (755/934 commandes ≈81%) avec limites documentées.
+- Piste d'amélioration : Inclure une vérification explicite des valeurs NULL dans les flags et un test de stabilité temporelle (p.ex. window month-over-month) pour renforcer la robustesse.
 
 **Executive justification**
-- Observation : La section 'Réponse exécutive' propose deux actions claires au VP opérations (pilote pour profils 'Achat employé' et 'Livraison fragile' et test merchandising) en langage métier.
-- Piste d'amélioration : Préciser les KPI cibles du pilote (ex. réduction du temps de picking, uplift % attendu pour le bundle) pour faciliter la décision.
+- Observation : La section 'Réponse exécutive' donne une décision claire pour le VP Opérations (prioriser fragile et employé) et une recommandation commerciale (tester bundle Home & Garden + Books & Media).
+- Piste d'amélioration : Ajouter un KPI attendu (p.ex. réduction du temps de picking ou lift attendu du bundle) pour aider le CEO à mesurer le succès du changement.
 
 **Process trace**
-- Observation : La reproduction liste les commandes make (generate/load/check) mais il n'y a aucune trace des commits git ni de note IA déclarée.
-- Piste d'amélioration : Inclure l'historique git (≥3 commits avec messages) et une note IA précisant outils utilisés et validation humaine.
+- Observation : Le brief documente la pipeline (make generate/load/check) mais ne fournit pas d'historique git ni de note d'usage IA ou log de décisions détaillé.
+- Piste d'amélioration : Fournir au moins 3 commits significatifs et une courte note IA indiquant outil + prompt + validation humaine dans le decision log.
 
 **Reproducibility**
-- Observation : Les instructions 'make generate / make load / make check' et la commande pour exécuter la SQL sont fournies, avec références de docs et scripts listés.
-- Piste d'amélioration : Ajouter un README minimal indiquant les prérequis exacts (version DuckDB, dépendances) et un test automatisé qui s'exécute de bout en bout sur un clone propre.
-
-_Quelques points appellent une attention particulière lors de la prochaine itération : absence_de_journal_git, note_IA_non_fournie._
+- Observation : La section 'Reproduction' donne les commandes make à exécuter et des chemins vers docs et SQL (make generate; make load; make check).
+- Piste d'amélioration : Préciser les prérequis environnementaux (versions, dépendances) et éviter tout chemin codé en dur dans les scripts pour atteindre l'état 'clone → run' sans ajustement.
 
 ## 3. Déclaration d'utilisation de l'IA
 
-> La déclaration documente bien les outils (avec versions) et les étapes d'utilisation, et décrit clairement comment les résultats ont été validés localement. Par contre elle ne mentionne pas explicitement les limites, biais ou erreurs constatées du comportement de l'IA (ex. hallucinations, réponses incorrectes, ou situations à risque).
+> Bonne traçabilité des interactions IA avec preuve d'exécution et validation locale. Indiquez la version/modèle pour tous les agents nommés (p.ex. Cursor) et explicitez davantage les limites ou erreurs attribuables directement aux suggestions de l'IA.
 
 **Sujets bien couverts dans votre déclaration :**
 
 - outils utilisés (nom + version/modèle)
 - à quelle étape l'IA a été utilisée
 - comment la sortie a été validée par l'humain
-
-**Sujets à ajouter ou expliciter pour la prochaine itération :**
-
 - limites ou erreurs observées
 
 ## 4. Pistes d'action pour la prochaine itération
 
 - Reprendre la requête de la section « Preuve » pour qu'elle s'exécute sur db/nexamart.duckdb et qu'elle produise la forme attendue (voir pistes en section 1).
-- Réviser le brief en tenant compte des observations par dimension de la section 2.
-- Compléter i-usage.md en y ajoutant : limites ou erreurs observées.
 
 ---
 
 ## 5. Traçabilité
 
-- **Run ID :** `20260529T000917Z-46f8532c`
+- **Run ID :** `20260529T001953Z-efa55432`
 - **Devoir :** `S04`
 - **Étudiant·e :** `XArsenault`
 - **Commit analysé :** `686d997`
-- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260529T000917Z-46f8532c/XArsenault/`
+- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260529T001953Z-efa55432/XArsenault/`
 - **Prompts (SHA-256) :**
   - `rubric_grader_system` : `505f32d1d8319d66...`
   - `ai_usage_grader_system` : `81cb7fdf89bda55a...`
