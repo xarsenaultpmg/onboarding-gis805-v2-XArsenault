@@ -1,6 +1,6 @@
 ---
 window: final
-sessions: S11–S13
+sessions: S11
 ---
 
 # Remise finale — Instructions
