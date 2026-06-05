@@ -68,4 +68,16 @@
   - Relu les noms de profils (« Commande standard », « Promo fidélité », etc.) pour lisibilité VP.
 - **Justification :** Accélérer la construction SQL et la doc tout en validant chaque chiffre du brief sur `db/nexamart.duckdb` local ; les choix de nommage et la priorisation des recommandations VP restent ma responsabilité.
 
+### 2026-06-04 — Séance S07
+- **Modèle :** Claude Sonnet 4.6
+- **Prompt :** « Aide-moi à livrer la séance S07 : le board peut-il voir ventes, retours, inventaire et budget dans une seule vue sans mentir ? Je dois construire les tables de faits manquantes, écrire un drill-across entre fact_sales et fact_returns, une vue réel-vs-budget, et répondre à la question du CEO avec des chiffres sur mes données. Utilise mes tables DuckDB modélisées, pas les raw. »
+- **Résultat :** Claude a guidé la création des tables de faits manquantes (`fact_returns`, `fact_budget`, `fact_inventory_snapshot`), des requêtes d'intégration (`s07-drill-across.sql`, `s07-actual-vs-budget.sql`), du fichier de réconciliation, de la bus matrix et des deux briefs. Toutes les analyses partent de `fact_*` et `dim_*`, pas des `raw_*`.
+- **Validation :**
+  - J'ai roulé `.\run.ps1 generate` puis `.\run.ps1 load` sur `db/nexamart.duckdb` (seed `team_3577855103`) pour matérialiser les 4 faits : `fact_sales` (3 000 lignes), `fact_returns` (161), `fact_budget` (1 200), `fact_inventory_snapshot` (6 996).
+  - J'ai exécuté `sql/checks/s07-reconciliation.sql` : les 4 contrôles retournent `PASS` avec écart `0,00` — les totaux agrégés par CTE sont identiques aux totaux directs des tables.
+  - J'ai exécuté le drill-across ventes × retours et retenu le KPI **Automotive — mars 2025** : 931,92 $ de remboursements sur 4 351,32 $ de ventes, soit **21,42 %** de taux — signal le plus fort sur mes données.
+  - J'ai exécuté la vue réel-vs-budget et retenu **Sports & Outdoors — NexaMart Calgary — mai 2025** : -100 916,21 $ (-99,3 %) comme écart le plus significatif à reporter au CFO.
+  - J'ai relu `docs/bus-matrix.md` pour vérifier que les dimensions conformes utilisées dans les requêtes corresponde bien à celles déclarées dans la matrice.
+- **Justification :** Claude a servi de co-équipier analytique pour structurer l'intégration multi-star, construire les requêtes drill-across au grain commun et produire les preuves chiffrées pour le brief. Les KPI retenus, les interprétations business et la validation des totaux ont été faits par moi.
+
 <!-- Ajoutez vos entrées ci-dessous -->
