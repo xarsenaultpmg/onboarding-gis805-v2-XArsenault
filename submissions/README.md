@@ -56,9 +56,9 @@ est *évalué* est l'état de `main` au moment où le PR est ouvert.
 
 | Branche cible      | Jalon                              | Sessions couvertes | Échéance indicative |
 |--------------------|-------------------------------------|--------------------|---------------------|
-| `submit/a1`        | Revue de pairs 1                    | S01–S04            | voir `docs/calendar.md` |
-| `submit/a2`        | Revue de pairs 2                    | S06–S09            | voir `docs/calendar.md` |
-| `submit/final`     | Remise finale (défense de pack)     | S11–S13            | voir `docs/calendar.md` |
+| `submit/a1`        | Studio shipments S01–S04            | S01–S04            | voir `docs/calendar.md` |
+| `submit/a2`        | Studio shipments S07–S09            | S07–S09            | voir `docs/calendar.md` |
+| `submit/final`     | Handoff pack + metric definitions   | S11                | voir `docs/calendar.md` |
 
 ## Étapes (toutes les remises)
 
