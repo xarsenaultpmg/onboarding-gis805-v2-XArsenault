@@ -1,8 +1,8 @@
 # Copie corrigée — Examen intra 1 · GIS805-06
 
 **Étudiant·e :** Xavier Arsenault
-**Score MCQ :** 22.0 / 22.0  (100%)
-**Score total :** 24.5 / 25 (98%)
+**Score MCQ :** 21.0 / 21  (100%)
+**Score total :** 23.5 / 24.0 (98%)
 
 > Les questions à choix multiples sont présentées ci-dessous avec ta réponse et la réponse correcte. ✓ = bonne réponse · ✗ = mauvaise réponse.
 
@@ -10,18 +10,15 @@
 
 ## Structure dimensionnelle
 
-### ✓ q01-grain
+### ∅ q01-grain  _(annulée — point accordé à tous)_
 
 **Question :**
 
 Dans fact_sales chez NexaMart, le grain est « une ligne = une ligne de commande (sale_line_id) ». Que signifie cette décision ?
 
-**Tes choix :**
+**Ta réponse :** Chaque ligne représente un article facturé dans une commande ; deux articles dans la même commande = deux lignes.
 
-  Chaque ligne de la table représente un produit unique vendu, peu importe la commande.
-→ **Chaque ligne représente un article facturé dans une commande ; deux articles dans la même commande = deux lignes.** ✓
-  Chaque ligne représente une commande complète, avec tous ses articles agrégés.
-  Chaque ligne représente un client et la somme de tous ses achats.
+> _Cette question a été annulée après révision en classe. Le point est accordé à tous les étudiant·e·s._
 
 ### ✓ q02-mesure-vs-dim
 
