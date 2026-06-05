@@ -11,10 +11,11 @@ s'adapte à la question, pas l'inverse.
 answers/S01_executive_brief.md
 answers/S02_executive_brief.md
 ...
-answers/S13_executive_brief.md
+answers/S11_executive_brief.md
 ```
 
-Les séances **S05**, **S10** et **S14** sont des examens — pas de brief.
+Les séances **S06** et **S12** sont des examens — pas de brief.
+La séance **S10** est une séance de pratique non notée — pas de brief obligatoire.
 
 ## Sections attendues (repère, pas obligation)
 
