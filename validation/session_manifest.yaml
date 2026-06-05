@@ -167,43 +167,34 @@ sessions:
     rubric: null
 
   S06:
-    title: "Multi-star et drill-across"
+    title: "Examen intra 1"
     deadline: "2026-06-01"
-    submission_window: a2
-    path_globs:
-      - "answers/S06_executive_brief.md"
-      - "sql/facts/fact_budget.sql"
-      - "sql/facts/fact_returns.sql"
-      - "sql/views/*.sql"
-    required_artefacts:
-      - path: "answers/S06_executive_brief.md"
-        min_bytes: 400
-        must_contain_sections: *brief_sections
-    sql_artefacts:
-      - path: "sql/facts/fact_budget.sql"
-        must_create_object: "fact_budget"
-    warehouse_checks:
-      - reconcile_sales_vs_budget
-    rubric:
-      reference_brief_path: "tools/grader/reference/S06_executive_brief.md"
-      emphasis_dimensions: [model_quality, validation_quality]
+    submission_window: none
+    path_globs: []
+    required_artefacts: []
+    sql_artefacts: []
+    warehouse_checks: []
+    rubric: null
 
   S07:
-    title: "Dimensions spéciales (role-playing, hiérarchies, NULLs)"
-    deadline: "2026-05-28"
+    title: "Multi-star et drill-across"
+    deadline: "2026-06-12"
     submission_window: a2
     path_globs:
       - "answers/S07_executive_brief.md"
-      - "sql/dims/dim_date.sql"
+      - "sql/integration/s07-drill-across.sql"
+      - "sql/integration/s07-actual-vs-budget.sql"
+      - "docs/bus-matrix.md"
     required_artefacts:
       - path: "answers/S07_executive_brief.md"
         min_bytes: 400
         must_contain_sections: *brief_sections
     sql_artefacts: []
-    warehouse_checks: []
+    warehouse_checks:
+      - reconcile_sales_vs_budget
     rubric:
       reference_brief_path: "tools/grader/reference/S07_executive_brief.md"
-      emphasis_dimensions: [model_quality]
+      emphasis_dimensions: [model_quality, validation_quality]
 
   S08:
     title: "Ponts pondérés et SCD avancés"
@@ -325,8 +316,8 @@ submission_windows:
     deadline: "2026-05-14"
     branch: "submit/a1"
   a2:
-    sessions: [S06, S07, S08, S09]
-    deadline: "2026-06-04"
+    sessions: [S07, S08, S09]
+    deadline: "2026-06-12"
     branch: "submit/a2"
   final:
     sessions: [S11, S12, S13]
