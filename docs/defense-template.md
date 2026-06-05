@@ -1,8 +1,84 @@
-# Defense au board — guide de preparation (S12)
+# S10 — Guide de préparation : sprint documentation et rétroaction
 
-> **Contexte :** En S12, vous presentez et defendez votre modele dimensionnel
-> devant le CEO (votre instructeur) et le board (vos collegues).
-> Ce guide vous aide a structurer votre presentation de 7 minutes.
+> **Contexte :** S10 (15 juin) est une séance de **pratique non notée**.
+> Vous construisez votre handoff pack et en testez la lisibilité avec un pair.
+> La remise **notée** (10 %) est en **S11** (18 juin) : handoff pack complet + metric definitions.
+
+---
+
+## Ce que vous produisez ce soir (S10)
+
+| Document | Chemin | Critère d'acceptation |
+|----------|--------|----------------------|
+| Model card | `docs/model-card.md` | Un analyste junior comprend le modèle sans vous appeler |
+| Bus matrix | `docs/bus-matrix.md` | À jour après S09 — toutes les tables de faits listées |
+| Dictionnaire de données | `docs/data-dictionary.md` | Chaque `dim_*` et `fact_*` avec définition business |
+| Journal de décisions | `docs/decision-log.md` | Au moins 5 décisions avec justification business |
+
+> Ces drafts **ne sont pas soumis ce soir**. Vous les finalisez en S11.
+
+---
+
+## La revue par les pairs (S10)
+
+Échangez votre draft de model card avec un pair. Chacun évalue l'autre en 15 minutes :
+
+1. **Grain** — est-il explicitement énoncé pour chaque table de faits ?
+2. **SCD** — la politique est-elle documentée et justifiée ?
+3. **NULLs** — les membres inconnus sont-ils nommés et justifiés ?
+4. **Bus matrix** — est-elle à jour avec toutes les tables de faits produites depuis S02 ?
+5. **Décision log** — les décisions expliquent-elles *pourquoi*, pas seulement *quoi* ?
+
+Chaque étudiant repart avec **1 point fort + 1 point à améliorer** avant S11.
+
+---
+
+## Checklist avant la remise S11 (18 juin)
+
+### Documents handoff
+- [ ] `docs/model-card.md` : grain, faits, dimensions, SCD, NULLs, ponts, risques (≥ 500 octets)
+- [ ] `docs/bus-matrix.md` : colonnes = tables de faits, lignes = dimensions (≥ 200 octets)
+- [ ] `docs/data-dictionary.md` : chaque colonne avec définition business (≥ 200 octets)
+- [ ] `docs/decision-log.md` : au moins 5 décisions justifiées (≥ 200 octets)
+- [ ] `docs/metric-definitions.md` : au moins 4 KPIs (nom, formule SQL, grain, source, fréquence) (≥ 300 octets)
+
+### Brief et trace
+- [ ] `answers/S11_executive_brief.md` : sections obligatoires remplies (≥ 400 octets)
+- [ ] `ai-usage.md` : toutes les interactions IA tracées
+
+### Technique
+- [ ] `make check` passe sans FAIL depuis un clone frais
+- [ ] `db/nexamart.duckdb` est à jour (`make load` récent)
+- [ ] Tout est commité et poussé sur `main`
+
+---
+
+## Format du metric definitions pack (`docs/metric-definitions.md`)
+
+Pour chaque KPI de votre modèle :
+
+```markdown
+| Nom | Formule SQL (avec grain) | Source | Fréquence |
+|-----|--------------------------|--------|-----------|
+| Revenue total | `SUM(fact_sales.revenue) GROUP BY dim_date.month` | fact_sales | Quotidien |
+| Taux de retour | `COUNT(fact_returns) / COUNT(fact_sales)` | fact_returns, fact_sales | Hebdomadaire |
+```
+
+**Minimum 4 KPIs couvrant au moins 2 tables de faits différentes.**
+Testez chaque formule sur votre DuckDB avant de soumettre.
+
+---
+
+## Questions difficiles à anticiper pour l'examen final (S12)
+
+L'examen final teste la maîtrise complète — les sujets ci-dessous reviennent souvent :
+
+1. **« Pourquoi ce grain et pas un plus fin/grossier ? »** — Nommez une question impossible avec un grain différent.
+2. **« Comment savez-vous que vos chiffres sont justes ? »** — Montrez votre logique de réconciliation.
+3. **« Que se passe-t-il quand un client change de région ? »** — Expliquez votre politique SCD et son impact.
+4. **« Définissez "revenue" sans ambiguïté. »** — C'est exactement ce que votre metric definitions pack doit répondre.
+5. **« Deux tables de faits partagent-elles une dimension conforme ? »** — Votre bus matrix répond à ça.
+
 
 ---
 
