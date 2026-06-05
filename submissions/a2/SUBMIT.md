@@ -1,6 +1,6 @@
 ---
 window: a2
-sessions: S06–S09
+sessions: S07–S09
 ---
 
 # Remise A2 — Instructions
