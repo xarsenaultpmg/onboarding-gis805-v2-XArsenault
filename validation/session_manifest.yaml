@@ -237,8 +237,8 @@ sessions:
       emphasis_dimensions: [model_quality]
 
   S10:
-    title: "Examen intra 2"
-    deadline: "2026-06-08"
+    title: "Comité du board : mini-présentations et rétroaction (non notée)"
+    deadline: "2026-06-15"
     submission_window: none
     path_globs: []
     required_artefacts: []
