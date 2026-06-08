@@ -36,18 +36,21 @@ def main():
         n_segments = max(1, int(rng.gauss(overlap_density, 0.7)))
         n_segments = min(n_segments, len(SEGMENTS))
         assigned = rng.sample(SEGMENTS, n_segments)
-        # Generate weights that sum to 1.0
+        # Generate weights that sum to exactly 1.0 after rounding
         raw_weights = [rng.uniform(0.1, 1.0) for _ in assigned]
         total = sum(raw_weights)
-        for seg, w in zip(assigned, raw_weights):
+        normalized = [round(w / total, 4) for w in raw_weights]
+        # Force last weight so the rounded sum is exactly 1.0
+        normalized[-1] = round(1.0 - sum(normalized[:-1]), 4)
+        for seg, w, raw_w in zip(assigned, normalized, raw_weights):
             bridge_id += 1
             bridge_rows.append({
                 "bridge_id": bridge_id,
                 "customer_id": cust["customer_id"],
                 "segment": seg,
-                "weight": round(w / total, 4),
+                "weight": w,
                 "effective_date": cust["join_date"],
-                "is_primary": 1 if w == max(raw_weights) else 0,
+                "is_primary": 1 if raw_w == max(raw_weights) else 0,
             })
 
     # --- Campaign allocation bridge (campaign ↔ segment with budget weight) ---
