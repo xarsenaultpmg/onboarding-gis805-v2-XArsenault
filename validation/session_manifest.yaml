@@ -167,43 +167,34 @@ sessions:
     rubric: null
 
   S06:
-    title: "Multi-star et drill-across"
+    title: "Examen intra 1"
     deadline: "2026-06-01"
-    submission_window: a2
-    path_globs:
-      - "answers/S06_executive_brief.md"
-      - "sql/facts/fact_budget.sql"
-      - "sql/facts/fact_returns.sql"
-      - "sql/views/*.sql"
-    required_artefacts:
-      - path: "answers/S06_executive_brief.md"
-        min_bytes: 400
-        must_contain_sections: *brief_sections
-    sql_artefacts:
-      - path: "sql/facts/fact_budget.sql"
-        must_create_object: "fact_budget"
-    warehouse_checks:
-      - reconcile_sales_vs_budget
-    rubric:
-      reference_brief_path: "tools/grader/reference/S06_executive_brief.md"
-      emphasis_dimensions: [model_quality, validation_quality]
+    submission_window: none
+    path_globs: []
+    required_artefacts: []
+    sql_artefacts: []
+    warehouse_checks: []
+    rubric: null
 
   S07:
-    title: "Dimensions spéciales (role-playing, hiérarchies, NULLs)"
-    deadline: "2026-05-28"
+    title: "Multi-star et drill-across"
+    deadline: "2026-06-12"
     submission_window: a2
     path_globs:
       - "answers/S07_executive_brief.md"
-      - "sql/dims/dim_date.sql"
+      - "sql/integration/s07-drill-across.sql"
+      - "sql/integration/s07-actual-vs-budget.sql"
+      - "docs/bus-matrix.md"
     required_artefacts:
       - path: "answers/S07_executive_brief.md"
         min_bytes: 400
         must_contain_sections: *brief_sections
     sql_artefacts: []
-    warehouse_checks: []
+    warehouse_checks:
+      - reconcile_sales_vs_budget
     rubric:
       reference_brief_path: "tools/grader/reference/S07_executive_brief.md"
-      emphasis_dimensions: [model_quality]
+      emphasis_dimensions: [model_quality, validation_quality]
 
   S08:
     title: "Ponts pondérés et SCD avancés"
@@ -246,8 +237,8 @@ sessions:
       emphasis_dimensions: [model_quality]
 
   S10:
-    title: "Examen intra 2"
-    deadline: "2026-06-08"
+    title: "Comité du board : mini-présentations et rétroaction (non notée)"
+    deadline: "2026-06-15"
     submission_window: none
     path_globs: []
     required_artefacts: []
@@ -256,8 +247,8 @@ sessions:
     rubric: null
 
   S11:
-    title: "Documentation et revue de design"
-    deadline: "2026-06-11"
+    title: "Handoff pack + metric definitions + perspectives GIS806"
+    deadline: "2026-06-21"
     submission_window: final
     path_globs:
       - "answers/S11_executive_brief.md"
@@ -278,6 +269,8 @@ sessions:
         min_bytes: 200
       - path: "docs/decision-log.md"
         min_bytes: 200
+      - path: "docs/metric-definitions.md"
+        min_bytes: 300
     sql_artefacts: []
     warehouse_checks: []
     rubric:
@@ -285,12 +278,11 @@ sessions:
       emphasis_dimensions: [communication, governance]
 
   S12:
-    title: "Comité du board : présentation et défense"
-    deadline: "2026-06-15"
-    submission_window: final
+    title: "Examen final (S01–S11)"
+    deadline: "2026-06-22"
+    submission_window: none
     path_globs:
       - "answers/S12_executive_brief.md"
-      - "submissions/final/**"
     required_artefacts:
       - path: "answers/S12_executive_brief.md"
         min_bytes: 400
@@ -299,22 +291,7 @@ sessions:
     warehouse_checks: []
     rubric:
       reference_brief_path: "tools/grader/reference/S12_executive_brief.md"
-      emphasis_dimensions: [communication]
-
-  S13:
-    title: "Au-delà du modèle : survol GIS806"
-    deadline: "2026-06-18"
-    submission_window: final
-    path_globs:
-      - "answers/S13_executive_brief.md"
-    required_artefacts:
-      - path: "answers/S13_executive_brief.md"
-        min_bytes: 300
-    sql_artefacts: []
-    warehouse_checks: []
-    rubric:
-      reference_brief_path: "tools/grader/reference/S13_executive_brief.md"
-      emphasis_dimensions: [communication]
+      emphasis_dimensions: [model_quality, validation_quality, executive_justification]
 
 # ============================================================
 # Submission windows (drives PR-merge gate)
@@ -325,10 +302,10 @@ submission_windows:
     deadline: "2026-05-14"
     branch: "submit/a1"
   a2:
-    sessions: [S06, S07, S08, S09]
-    deadline: "2026-06-04"
+    sessions: [S07, S08, S09]
+    deadline: "2026-06-12"
     branch: "submit/a2"
   final:
-    sessions: [S11, S12, S13]
-    deadline: "2026-06-15"
+    sessions: [S11]
+    deadline: "2026-06-21"
     branch: "submit/final"

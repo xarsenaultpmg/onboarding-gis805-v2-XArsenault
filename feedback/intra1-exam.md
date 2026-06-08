@@ -10,11 +10,11 @@ Voici ta rétroaction pour l'examen intra 1 du 1er juin 2026.
 
 | Composante | Score | Maximum |
 |---|---|---|
-| QCM (22 questions) | 22 | 22 |
+| QCM (21 questions) | 21 | 21 |
 | Questions ouvertes (3 questions) | 2.5 | 3 |
-| **Total** | **24.5** | **25** |
+| **Total** | **23.5** | **24** |
 
-**24.5 / 25 (98%) — ✓ Suffisant**
+**23.5 / 24 (98%) — ✓ Suffisant**
 
 ---
 
@@ -22,7 +22,7 @@ Voici ta rétroaction pour l'examen intra 1 du 1er juin 2026.
 
 | Section | Score | /max |
 |---|---|---|
-| Structure dimensionnelle | 4 | 4 |
+| Structure dimensionnelle | 3 | 3 |
 | Slowly Changing Dimensions | 4 | 4 |
 | Jointures et clés | 5 | 5 |
 | Junk et dimensions dégénérées | 4 | 4 |

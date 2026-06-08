@@ -71,7 +71,7 @@ rules:
     tables: [fact_sales, fact_budget]
     check: drill_across_variance_within_tolerance
     tolerance_pct: 200
-    manifest_session: S06
+    manifest_session: S07
 
   - name: bridge_weights_sum_to_one
     table: bridge_customer_segment
