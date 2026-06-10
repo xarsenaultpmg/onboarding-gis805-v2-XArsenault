@@ -9,7 +9,7 @@
 - **Date :** 11 juin 2026
 - **Format :** Travail en autonomie — pas de cours magistral cette semaine
 - **Durée estimée :** 3 h 30 réparties sur 3 à 4 jours
-- **Échéance :** **avant le 15 juin 18h00** — la séance S10 est l'examen intra
+- **Échéance :** **avant le 15 juin 18h00** — la séance S10 (Comité du board) commence le soir même
 
 ---
 
@@ -457,7 +457,7 @@ git commit -m "S09: 4 types de tables de faits - transaction, snapshot, accumula
 git push
 ```
 
-⚠ **Rappel :** La séance S10 du 15 juin est l'examen intra — il couvre S06 à S09. Remettez votre travail avant 18h00 le 15 juin.
+⚠ **Rappel :** Remettez votre travail avant 18h00 le 15 juin — la séance S10 (Comité du board, non noté) commence le soir même.
 
 ---
 
