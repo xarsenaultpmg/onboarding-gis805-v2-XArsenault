@@ -1,7 +1,8 @@
 -- ============================================================
 -- S09 — Table de faits transactionnelle
 -- ============================================================
--- GRAIN : une ligne = une ligne de commande (order_id + sale_line_id)
+-- GRAIN : une ligne = une transaction atomique (transaction_id)
+--         transaction_type ∈ {sale, return, exchange}
 -- TYPE  : Transaction Fact Table
 -- RÈGLE : INSERT-ONLY — on n'update jamais une transaction passée.
 --         Additif sur TOUTES les dimensions (SUM est toujours correct).
@@ -13,12 +14,13 @@
 
 -- ── Étape 1 : Vérifier le grain ──────────────────────────────
 -- Exécutez cette requête AVANT d'écrire les vôtres.
--- Le grain est respecté si total_lignes > nb_commandes_distinctes
--- (plusieurs produits par commande).
+-- Le grain est respecté si total_lignes = transactions_distinctes
+-- (une ligne = une transaction atomique, identifiée par transaction_id).
 
 SELECT
-    COUNT(*)                    AS total_lignes,
-    COUNT(DISTINCT order_id)    AS nb_commandes_distinctes
+    COUNT(*)                          AS total_lignes,
+    COUNT(DISTINCT transaction_id)    AS transactions_distinctes,
+    COUNT(DISTINCT transaction_type)  AS nb_types_transaction
 FROM fact_orders_transaction;
 
 
