@@ -111,33 +111,33 @@ FROM fact_orders_transaction;
 ### 2.2 — Requête CEO 1 : revenue par catégorie
 
 ```sql
--- Revenue brut, coût total et marge par catégorie de produit
+-- Revenue par catégorie de produit
 SELECT
     p.category,
     COUNT(*)                        AS nb_transactions,
     SUM(f.quantity)                 AS unites_vendues,
-    SUM(f.line_total)               AS revenue_brut,
-    SUM(f.cost)                     AS cout_total,
-    SUM(f.line_total - f.cost)      AS marge_brute,
-    ROUND(100.0 * SUM(f.line_total - f.cost) / NULLIF(SUM(f.line_total), 0), 1) AS pct_marge
+    SUM(f.amount)                   AS revenue_brut
 FROM fact_orders_transaction f
 JOIN dim_product p ON p.product_key = f.product_key
 GROUP BY 1
 ORDER BY revenue_brut DESC;
 ```
 
-### 2.3 — Requête CEO 2 : top 5 magasins par marge
+> **Note :** `fact_orders_transaction` contient `amount` (montant de la transaction). La table `fact_sales` contient `line_total`. Ce sont deux grains différents — `fact_orders_transaction` inclut les retours et échanges via `transaction_type`.
+
+### 2.3 — Requête CEO 2 : top 5 magasins par revenue
 
 ```sql
--- Top 5 magasins par marge brute
+-- Top 5 magasins par revenue total
 SELECT
     ds.store_name,
     ds.region,
-    SUM(f.line_total - f.cost)      AS marge_brute
+    SUM(f.amount)                   AS revenue_total,
+    SUM(f.quantity)                 AS unites_vendues
 FROM fact_orders_transaction f
 JOIN dim_store ds ON ds.store_key = f.store_key
 GROUP BY 1, 2
-ORDER BY marge_brute DESC
+ORDER BY revenue_total DESC
 LIMIT 5;
 ```
 
