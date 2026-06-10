@@ -32,7 +32,7 @@ Cette séance n'a pas de cours magistral. Vous travaillez à votre rythme avec c
 
 Un résumé audio de ~12 min couvre la théorie des 4 types de faits, les pièges classiques et le mapping NexaMart. Il remplace la partie magistrale du cours.
 
-🎧 **Lien audio :** [AUDIO_LINK_HERE]
+🎧 **Lien audio :** [Écouter le résumé audio S09 (~12 min)](https://notebooklm.google.com/notebook/1b7ce390-3280-405f-b2ea-a6555fbb17b8/artifact/2d48d635-1df2-4318-a1ec-0f036c3ff440?utm_source=nlm_web_share&utm_medium=google_oo&utm_campaign=art_share_2&utm_content=&utm_smc=nlm_web_share_google_oo_art_share_2_)
 
 > Pour générer votre propre version : uploadez `docs/lab-guides/GIS805-09_lab.pdf` et `docs/lab-guides/GIS805-09_notebooklm-guide.md` sur [notebooklm.google.com](https://notebooklm.google.com) → cliquez « Audio Overview ».
 
