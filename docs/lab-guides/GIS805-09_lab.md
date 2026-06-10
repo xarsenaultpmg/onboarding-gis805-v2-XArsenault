@@ -17,24 +17,24 @@
 
 ### Pas de cours cette semaine — voici comment vous organiser
 
-Cette séance n'a pas de cours magistral. Vous travaillez à votre rythme avec ce guide, les diapositives PDF, et le résumé audio.
+Cette séance n'a pas de cours magistral. Vous travaillez à votre rythme avec ce guide, les diapositives PDF, et la vidéo de synthèse.
 
 **Planning suggéré :**
 
 | Jour | Tâche | Durée |
 |---|---|---|
-| Jeudi 11 juin | Lire les diapositives PDF + écouter l'audio + `make generate && make load` | ~60 min |
+| Jeudi 11 juin | Lire les diapositives PDF + regarder la vidéo + `make generate && make load` | ~60 min |
 | Vendredi 12 juin | Exercices 1 et 2 (transaction + snapshot périodique) | ~70 min |
 | Samedi 13 juin | Exercices 3 et 4 (accumulating + factless) | ~70 min |
 | Dimanche 14 juin | Brief exécutif + arbre de décision + `git push` | ~50 min |
 
-### Résumé audio (NotebookLM)
+### Vidéo de synthèse (NotebookLM)
 
-Un résumé audio de ~12 min couvre la théorie des 4 types de faits, les pièges classiques et le mapping NexaMart. Il remplace la partie magistrale du cours.
+Une vidéo de synthèse de ~6 min couvre la théorie des 4 types de faits, les pièges classiques et le mapping NexaMart. Elle remplace la partie magistrale du cours.
 
-🎧 **Lien audio :** [Écouter le résumé audio S09 (~12 min)](https://notebooklm.google.com/notebook/1b7ce390-3280-405f-b2ea-a6555fbb17b8/artifact/2d48d635-1df2-4318-a1ec-0f036c3ff440?utm_source=nlm_web_share&utm_medium=google_oo&utm_campaign=art_share_2&utm_content=&utm_smc=nlm_web_share_google_oo_art_share_2_)
+🎬 **Lien vidéo :** [Regarder la vidéo de synthèse S09 (~6 min)](https://notebooklm.google.com/notebook/1b7ce390-3280-405f-b2ea-a6555fbb17b8/artifact/2d48d635-1df2-4318-a1ec-0f036c3ff440?utm_source=nlm_web_share&utm_medium=google_oo&utm_campaign=art_share_2&utm_content=&utm_smc=nlm_web_share_google_oo_art_share_2_)
 
-> Pour générer votre propre version : uploadez `docs/lab-guides/GIS805-09_lab.pdf` et `docs/lab-guides/GIS805-09_notebooklm-guide.md` sur [notebooklm.google.com](https://notebooklm.google.com) → cliquez « Audio Overview ».
+> Ce lien pointe vers le notebook NotebookLM préparé par l'instructeur — vous n'avez rien à téléverser, écoutez directement.
 
 ### Ce que vous savez déjà
 
@@ -68,6 +68,8 @@ make load
 | `fact_order_pipeline` | ~1 200 | Accumulating snapshot (NOUVEAU S09) |
 | `fact_promo_exposure` | ~1 500 | Factless (NOUVEAU S09) |
 
+> **Note :** Ces counts sont des ordres de grandeur — les volumes exacts dépendent du seed de votre équipe. Ne vous inquiétez pas si vos chiffres diffèrent : la validation fiable est `make check` (tous les checks `PASS`) et le fait que chaque table ci-dessus soit **non vide** (l'étape 1.3 affiche vos propres counts).
+
 ### Étape 1.2 — Vérifier le chargement
 
 ```bash
@@ -97,16 +99,17 @@ ORDER BY table_name;
 ### 2.1 — Vérifier le grain
 
 ```sql
--- Combien de lignes ? Combien de commandes distinctes ?
+-- Le grain doit être unique : une ligne = une transaction atomique
 SELECT
-    COUNT(*)              AS total_lignes,
-    COUNT(DISTINCT order_id) AS nb_commandes_distinctes
+    COUNT(*)                          AS total_lignes,
+    COUNT(DISTINCT transaction_id)    AS transactions_distinctes,
+    COUNT(DISTINCT transaction_type)  AS nb_types_transaction
 FROM fact_orders_transaction;
 ```
 
-**Question :** Le total_lignes est-il plus grand que nb_commandes_distinctes ? Expliquez pourquoi dans votre brief.
+**Question :** total_lignes est-il égal à transactions_distinctes ? Combien de types de transaction (`sale`, `return`, `exchange`) existe-t-il ? Expliquez dans votre brief pourquoi une table transactionnelle est insert-only.
 
-*Réponse attendue : oui — une commande peut contenir plusieurs lignes de produits (grain = ligne de commande, pas commande).*
+*Réponse attendue : total_lignes = transactions_distinctes — chaque ligne est une transaction unique identifiée par `transaction_id` (le grain est respecté). Plusieurs `transaction_type` coexistent. Insert-only : on ne modifie ni n'efface jamais une transaction passée.*
 
 ### 2.2 — Requête CEO 1 : revenue par catégorie
 
