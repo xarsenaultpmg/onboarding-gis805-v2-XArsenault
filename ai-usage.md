@@ -91,4 +91,16 @@
   - J'ai vérifié que les chiffres du brief viennent des tables DuckDB chargées, pas d'une lecture directe des CSV bruts.
 - **Justification :** Accélérer la structuration des requêtes et des textes exécutifs tout en gardant la responsabilité sur les choix de modélisation, l'interprétation business et la validation des chiffres du seed local.
 
+### 2026-06-14 — Séance S09
+- **Modèle :** Cursor / agent GPT-5.5
+- **Prompt :** « Aide-moi à livrer la séance S09 : quels processus NexaMart sont transactionnels, lesquels sont des snapshots, et lesquels sont de simples présences ? Je dois construire les tables de faits S09 manquantes, compléter les requêtes SQL des quatre types de faits, rédiger l'arbre de décision et produire le brief exécutif avec des chiffres réels sur mes données. Utilise les tables DuckDB modélisées, pas les CSV bruts, et prépare les changements en plusieurs sprints sans committer avant ma relecture. »
+- **Résultat :** L'agent a aidé à matérialiser les 4 tables de faits S09 (`fact_orders_transaction`, `fact_daily_inventory`, `fact_order_pipeline`, `fact_promo_exposure`), à compléter les 4 fichiers d'analyse `sql/fact-types/s09-*.sql`, à rédiger l'arbre de décision et le brief exécutif S09.
+- **Validation :**
+  - J'ai roulé `.\run.ps1 generate`, `.\run.ps1 load` et `.\run.ps1 check` sur le seed `team_3577855103`; le résultat final est **31 PASS, 0 FAIL, 0 SKIP**.
+  - Les requêtes S09 ont été exécutées avec `.\run.ps1 sql` : `fact_orders_transaction` contient **1 662 transactions** et **531 486,99 $** de revenu brut.
+  - Le piège semi-additif a été vérifié sur `fact_daily_inventory` : pour `Pet Supplies`, `SUM / AVG = 30,0`, soit les 30 jours de snapshots.
+  - Le pipeline contient **429 commandes**, dont **301 livrées** (**70,2 %**) avec un délai moyen de **10,3 jours**; les commandes non livrées ont été conservées dans le funnel.
+  - La factless `fact_promo_exposure` contient **132 expositions**; **170 clients actifs sur 285** n'ont pas été exposés (**59,6 %**).
+- **Justification :** Accélérer la production des livrables S09 tout en respectant la stratégie de sprints incrémentaux et en validant les chiffres directement dans DuckDB avant de les intégrer au brief.
+
 <!-- Ajoutez vos entrées ci-dessous -->

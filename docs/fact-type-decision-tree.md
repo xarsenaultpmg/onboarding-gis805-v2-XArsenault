@@ -10,12 +10,12 @@
 
 | Processus NexaMart | Table de faits | Type de fait | Question CEO à laquelle il répond | Justification du choix |
 |---|---|---|---|---|
-| Ventes | `fact_sales` | *(à compléter)* | *(à compléter)* | *(à compléter)* |
-| Ordres détaillés | `fact_orders_transaction` | *(à compléter)* | *(à compléter)* | *(à compléter)* |
-| Retours | `fact_returns` | *(à compléter)* | *(à compléter)* | *(à compléter)* |
-| Stock quotidien | `fact_daily_inventory` | *(à compléter)* | *(à compléter)* | *(à compléter)* |
-| Pipeline de commandes | `fact_order_pipeline` | *(à compléter)* | *(à compléter)* | *(à compléter)* |
-| Exposition promotionnelle | `fact_promo_exposure` | *(à compléter)* | *(à compléter)* | *(à compléter)* |
+| Ventes | `fact_sales` | Transaction | Quel revenu et quelle marge NexaMart génère-t-il par produit, magasin, client ou canal ? | Une ligne représente une ligne de commande déjà survenue. Les montants et quantités sont additifs sur toutes les dimensions et la table est insert-only. |
+| Ordres détaillés | `fact_orders_transaction` | Transaction | Quel revenu brut provient des ventes, retours et échanges par catégorie ou magasin ? | Une ligne représente une transaction atomique identifiée par `transaction_id`. Les événements passés ne sont pas mis à jour ; on ajoute de nouvelles transactions. |
+| Retours | `fact_returns` | Transaction | Quels produits, régions ou périodes concentrent les remboursements ? | Une ligne représente un retour observé. Les remboursements et quantités retournées sont des mesures additives au grain de l'événement. |
+| Stock quotidien | `fact_daily_inventory` | Periodic Snapshot | Quel niveau de stock moyen et quels jours d'approvisionnement observe-t-on par magasin ? | Une ligne capture l'état produit x magasin x jour. Le stock est semi-additif : on peut sommer par produit ou magasin, mais pas sur le temps. |
+| Pipeline de commandes | `fact_order_pipeline` | Accumulating Snapshot | Quel pourcentage des commandes atteint chaque jalon et combien de jours prend la livraison ? | Une ligne suit une commande dans son cycle de vie. Les dates de jalons sont remplies au fil du processus, donc c'est le seul fait qui accepte l'UPDATE. |
+| Exposition promotionnelle | `fact_promo_exposure` | Factless | Quelle part des clients a été exposée, et quels clients actifs n'ont pas été atteints ? | La table ne contient aucune mesure numérique. La présence d'une ligne indique l'exposition ; les analyses reposent sur `COUNT(*)` et les anti-jointures. |
 
 ### Colonnes d'aide
 
@@ -71,15 +71,15 @@ un retour, un paiement) ?
 
 *(Choisissez un processus de votre propre expérience professionnelle ou académique.)*
 
-**Processus choisi :** *(à compléter)*
+**Processus choisi :** prise en charge d'un patient en pharmacie de spécialité chez PMG
 
-**Type de fait approprié :** *(à compléter)*
+**Type de fait approprié :** Accumulating Snapshot
 
 **Justification :**
-- Question business à laquelle il répond : *(à compléter)*
-- Grain de la table : *(à compléter)*
-- Mesures ou absence de mesures : *(à compléter)*
-- Règle d'update (INSERT-ONLY ou UPDATE) : *(à compléter)*
+- Question business à laquelle il répond : combien de temps prend le parcours entre la réception d'une prescription spécialisée et la première dispensation au patient ?
+- Grain de la table : une ligne = un dossier patient x médicament spécialisé.
+- Mesures ou absence de mesures : délais entre jalons, statut courant du dossier, jours entre prescription, validation assurance, autorisation préalable, coordination et dispensation.
+- Règle d'update (INSERT-ONLY ou UPDATE) : UPDATE, car le même dossier est enrichi à mesure que les jalons sont atteints.
 
 ---
 
