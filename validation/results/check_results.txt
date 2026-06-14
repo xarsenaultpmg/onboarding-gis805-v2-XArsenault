@@ -1,5 +1,5 @@
 ============================================
-NexaMart Validation: 24 PASS, 5 FAIL, 2 SKIP
+NexaMart Validation: 31 PASS, 0 FAIL, 0 SKIP
 ============================================
 
 [PASS]  TABLE_EXISTS     dim_date                                       PASS
@@ -8,12 +8,12 @@ NexaMart Validation: 24 PASS, 5 FAIL, 2 SKIP
 [PASS]  TABLE_EXISTS     dim_customer                                   PASS
 [PASS]  TABLE_EXISTS     dim_channel                                    PASS
 [PASS]  TABLE_EXISTS     fact_sales                                     PASS
+[PASS]  TABLE_EXISTS     fact_returns                                   PASS
+[PASS]  TABLE_EXISTS     fact_budget                                    PASS
+[PASS]  TABLE_EXISTS     fact_daily_inventory                           PASS
+[PASS]  TABLE_EXISTS     fact_order_pipeline                            PASS
 [PASS]  TABLE_EXISTS     dim_order_profile                              PASS
-[FAIL]  TABLE_EXISTS     fact_returns                                   FAIL -- table not present
-[FAIL]  TABLE_EXISTS     fact_budget                                    FAIL -- table not present
-[FAIL]  TABLE_EXISTS     fact_daily_inventory                           FAIL -- table not present
-[FAIL]  TABLE_EXISTS     fact_order_pipeline                            FAIL -- table not present
-[FAIL]  TABLE_EXISTS     fact_promo_exposure                            FAIL -- table not present
+[PASS]  TABLE_EXISTS     fact_promo_exposure                            PASS
 [PASS]  ROW_COUNT        dim_date                                       PASS
 [PASS]  ROW_COUNT        dim_product                                    PASS
 [PASS]  ROW_COUNT        dim_store                                      PASS
@@ -31,5 +31,5 @@ NexaMart Validation: 24 PASS, 5 FAIL, 2 SKIP
 [PASS]  FK_NOT_NULL      fact_sales.customer_key                        PASS
 [PASS]  FK_NOT_NULL      fact_sales.channel_key                         PASS
 [PASS]  GRAIN_UNIQUE     fact_sales (order_number, sale_line_id)        PASS
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_budget does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name bridge_customer_segment does not exist!
+[PASS]  RECONCILE        sales_total vs budget_total                    PASS
+[PASS]  BRIDGE_WEIGHT    bridge_customer_segment SUM(weight)=1.0        PASS
