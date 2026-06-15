@@ -90,3 +90,21 @@ Justification :
 ## Amelioration la plus actionnable avant la defense au board (S12)
 
 <!-- une suggestion precise que le pair peut appliquer d'ici S12 -->
+
+---
+
+## Apres la revue — ce que vous devez faire avant S11
+
+1. **Committez ce fichier rempli dans VOTRE repo** (pas celui du pair) :
+   ```bash
+   git add docs/peer-reviews/peer-review-3.md
+   git commit -m "docs: revue de pair S10 (Jalon 3) — findings integres"
+   git push origin main
+   ```
+
+2. **Integrez les findings dans votre handoff pack avant S11 (18 juin).**
+   Le `process_trace` de S11 verifie que ce fichier est commite dans votre repo.
+   Un fichier vide ou non commite = findings non traces.
+
+3. **Ajoutez une note dans `ai-usage.md`** si vous avez utilise l'IA pendant la revue
+   (ex. : « j'ai demande a Copilot de relire mon grain statement »).
