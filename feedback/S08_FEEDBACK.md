@@ -1,8 +1,10 @@
 # Rétroaction automatisée -- S08 (Ponts pondérés, SCD avancés et relations many-to-many chez NexaMart)
 
-_Générée le 2026-06-15T13:49:51+00:00 -- Run `20260615T134147Z-6fe503db`_
+_Générée le 2026-06-15T14:16:52+00:00 -- Run `20260615T140912Z-5c174fe7`_
 
 Ce document est produit par un pipeline reproductible (validation automatique du livrable + analyse LLM du brief et de la déclaration IA). Une revue humaine précède toujours sa publication. **À ce stade expérimental, aucune note ni étiquette de niveau n'est diffusée : l'objectif est purement formatif.**
+
+> ⚠️ **Avertissement instructeur (à retirer avant publication) :** cette analyse a été générée avec `--skip-pull`. Le contenu correspond au commit local et **n'est peut-être pas la dernière version poussée par l'étudiant·e**.
 
 ---
 
@@ -21,7 +23,7 @@ Vous pouvez relancer le grader local (`tools/grader/grade_brief.py`) pour obteni
 
 ## 3. Déclaration d'utilisation de l'IA
 
-> Déclaration claire et suffisamment détaillée: le modèle et sa version sont nommés, l'étape d'utilisation est précisée, et les vérifications humaines sont documentées. La mention explicite de la limite des données (année 2025) et du retrait d'un signal faible renforce la transparence.
+> Déclaration claire et suffisamment détaillée : l'outil est nommé avec sa version, l'étape d'utilisation et les validations humaines sont documentées. La mention de la limite des données (seulement 2025) et de l'exclusion d'un signal peu fiable montre conscience des limites.
 
 **Sujets bien couverts dans votre déclaration :**
 
@@ -38,11 +40,11 @@ Vous pouvez relancer le grader local (`tools/grader/grade_brief.py`) pour obteni
 
 ## 5. Traçabilité
 
-- **Run ID :** `20260615T134147Z-6fe503db`
+- **Run ID :** `20260615T140912Z-5c174fe7`
 - **Devoir :** `S08`
 - **Étudiant·e :** `XArsenault`
 - **Commit analysé :** `e70d799`
-- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260615T134147Z-6fe503db/XArsenault/`
+- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260615T140912Z-5c174fe7/XArsenault/`
 - **Prompts (SHA-256) :**
   - `ai_usage_grader_system` : `81cb7fdf89bda55a...`
   - `rubric_grader_system` : `505f32d1d8319d66...`
