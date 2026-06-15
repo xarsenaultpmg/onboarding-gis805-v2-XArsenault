@@ -31,6 +31,10 @@
 
 Chaque étudiant repart avec **1 point fort + 1 point à améliorer** avant S11.
 
+> **À faire avant de quitter S10 :** remplissez `docs/peer-reviews/peer-review-3.md`
+> dans VOTRE repo avec les findings de la revue, puis committez et poussez.
+> Ce fichier fait partie du `process_trace` noté en S11.
+
 ---
 
 ## Checklist avant la remise S11 (18 juin)
