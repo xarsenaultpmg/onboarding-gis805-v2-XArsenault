@@ -1,8 +1,10 @@
 # Rétroaction automatisée -- S07 (Soirée d'intégration : multi-star, drill-across et réel-vs-cible)
 
-_Générée le 2026-06-15T13:36:30+00:00 -- Run `20260615T132720Z-459503cc`_
+_Générée le 2026-06-15T14:04:27+00:00 -- Run `20260615T135612Z-11e9faf4`_
 
 Ce document est produit par un pipeline reproductible (validation automatique du livrable + analyse LLM du brief et de la déclaration IA). Une revue humaine précède toujours sa publication. **À ce stade expérimental, aucune note ni étiquette de niveau n'est diffusée : l'objectif est purement formatif.**
+
+> ⚠️ **Avertissement instructeur (à retirer avant publication) :** cette analyse a été générée avec `--skip-pull`. Le contenu correspond au commit local et **n'est peut-être pas la dernière version poussée par l'étudiant·e**.
 
 ---
 
@@ -21,7 +23,7 @@ Vous pouvez relancer le grader local (`tools/grader/grade_brief.py`) pour obteni
 
 ## 3. Déclaration d'utilisation de l'IA
 
-> La déclaration est complète : le modèle est nommé avec sa version, l'étape d'utilisation est expliquée, les procédures de validation humaine sont détaillées et des limites de données sont mentionnées. Petit point d'amélioration : conserver la même structure pour chaque interaction future (dates + entrées multiples) afin de faciliter la traçabilité.
+> La déclaration est claire et fournit le nom et la version du modèle, décrit l'étape d'utilisation et donne des preuves de validation humaine concrètes. La mention explicite d'une limite des données (couverture 2025) complète bien la trace d'usage.
 
 **Sujets bien couverts dans votre déclaration :**
 
@@ -38,11 +40,11 @@ Vous pouvez relancer le grader local (`tools/grader/grade_brief.py`) pour obteni
 
 ## 5. Traçabilité
 
-- **Run ID :** `20260615T132720Z-459503cc`
+- **Run ID :** `20260615T135612Z-11e9faf4`
 - **Devoir :** `S07`
 - **Étudiant·e :** `XArsenault`
 - **Commit analysé :** `e70d799`
-- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260615T132720Z-459503cc/XArsenault/`
+- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260615T135612Z-11e9faf4/XArsenault/`
 - **Prompts (SHA-256) :**
   - `ai_usage_grader_system` : `81cb7fdf89bda55a...`
   - `rubric_grader_system` : `505f32d1d8319d66...`
