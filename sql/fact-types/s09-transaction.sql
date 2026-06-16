@@ -25,20 +25,39 @@ FROM fact_orders_transaction;
 
 
 -- ── Étape 2 : Requête CEO 1 — Revenue par catégorie ─────────
--- TODO : Calculez le revenue brut par catégorie de produit.
+-- Calcule le revenue brut par catégorie de produit.
 --        Jointure requise : fact_orders_transaction → dim_product
 --        Mesures : SUM(amount), SUM(quantity)
 -- Note : fact_orders_transaction utilise la colonne `amount` (pas line_total).
 
--- [Votre requête ici]
+SELECT
+    p.category,
+    COUNT(*)                        AS nb_transactions,
+    SUM(f.quantity)                 AS unites_vendues,
+    SUM(f.amount)                   AS revenue_brut
+FROM fact_orders_transaction AS f
+INNER JOIN dim_product AS p
+    ON p.product_key = f.product_key
+GROUP BY 1
+ORDER BY revenue_brut DESC;
 
 
 -- ── Étape 3 : Requête CEO 2 — Top 5 magasins par revenue ────
--- TODO : Identifiez les 5 magasins avec le revenue le plus élevé.
+-- Identifie les 5 magasins avec le revenue le plus élevé.
 --        Jointure requise : fact_orders_transaction → dim_store
 --        Résultat attendu : 5 lignes avec store_name, region, revenue_total, unites_vendues
 
--- [Votre requête ici]
+SELECT
+    ds.name                         AS store_name,
+    ds."région"                     AS region,
+    SUM(f.amount)                   AS revenue_total,
+    SUM(f.quantity)                 AS unites_vendues
+FROM fact_orders_transaction AS f
+INNER JOIN dim_store AS ds
+    ON ds.store_key = f.store_key
+GROUP BY 1, 2
+ORDER BY revenue_total DESC
+LIMIT 5;
 
 
 -- ── Étape 4 : Vérification de réconciliation ─────────────────

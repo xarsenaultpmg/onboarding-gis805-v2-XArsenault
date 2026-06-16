@@ -1,77 +1,42 @@
-# Bus Matrix — entrepôt NexaMart
+# Bus matrix — NexaMart S07
 
-> **Mettez à jour ce document après chaque séance** où vous ajoutez une table.
-> Ce tableau est la **carte de conformité** : quelles dimensions sont partagées
-> (conformes) entre quelles tables de faits ?
->
-> Le bus matrix est le test ultime du drill-across : si deux tables de faits
-> partagent un ✓ sur la même ligne, vous pouvez les interroger ensemble via
-> une dimension conformée — sans jointure directe fait-à-fait.
+> **Question CEO (S07) :** le board peut-il voir ventes, retours, inventaire et budget dans une seule vue sans mentir ?
 
-## Convention
+La réponse dépend de la conformité des dimensions. Une case `X` signifie que le processus utilise la même dimension via une FK et peut être agrégé à n'importe quel grain de cette dimension. Une case `~` signifie une **conformité partielle par rollup** : l'attribut partagé est un sous-ensemble agrégé de la dimension (ex. `category` sans `product_key`). Une case vide signifie que la dimension n'est pas applicable.
 
-| Symbole | Signification |
-|---|---|
-| ✓ | Dimension conforme — clé de substitution `_key` présente dans ce fait |
-| [r] | Role-playing : même `dim_date`, plusieurs FK distinctes dans le même fait |
-| ◐ | Accès via bridge — double-comptage possible sans `SUM(weight)` |
-| — | Non applicable — décision documentée dans `docs/decision-log.md` |
-| ? | À vérifier dans votre implémentation |
+## Matrice processus × dimensions conformes
 
----
+| Processus / table de faits | Grain | `dim_date` | `dim_product` | `dim_store` | `dim_customer` | `dim_channel` |
+|---|---|---:|---:|---:|---:|---:|
+| `fact_sales` | Ligne de commande (`sale_line_id`) | X | X | X | X | X |
+| `fact_returns` | Ligne de retour (`return_id`) | X | X | X | X | X |
+| `fact_inventory_snapshot` | Snapshot jour × produit × magasin | X | X | X |  |  |
+| `fact_budget` | Mois × catégorie × magasin | X | ~ | X |  |  |
 
-## Matrice de conformité
+> **`~` pour `fact_budget × dim_product` :** `fact_budget` ne contient pas de `product_key`. La colonne `category` est un `VARCHAR` brut dont les valeurs doivent correspondre exactement à `dim_product.category`. Le drill-across avec `fact_sales` est valide **au grain catégorie uniquement** — on ne peut pas descendre au niveau produit individuel dans le budget.
 
-> **Colonnes** = tables de faits · **Lignes** = dimensions
-> Remplissez selon **votre** implémentation — pas le modèle de référence.
-> Une cellule vide est une décision : documentez-la dans `decision-log.md`.
+## Décision de grain partagé
 
-| Dimension | `fact_sales` | `fact_returns` | `fact_orders_transaction` | `fact_daily_inventory` | `fact_order_pipeline` | `fact_budget` | `fact_promo_exposure` |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| `dim_date` | ✓ | ✓ | ✓ | ✓ | ✓ [r]×5 | ✓ | ✓ |
-| `dim_customer` | ✓ | ✓ | ✓ | — | ✓ | — | ✓ |
-| `dim_product` | ✓ | ✓ | ✓ | ✓ | — | ✓ | — |
-| `dim_store` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ | — |
-| `dim_channel` | ✓ | ? | ✓ | — | ✓ | — | ✓ |
-| `dim_campaign` | — | — | — | — | — | — | ✓ |
-| `dim_order_profile` (junk) | — | — | ✓ | — | — | — | — |
-| `dim_segment` (via bridge) | ◐ | — | ◐ | — | — | — | — |
+Pour le drill-across S07, les faits ne sont jamais joints directement. Chaque fait est d'abord agrégé au **grain commun** requis par la question :
 
----
+- **Ventes × retours** : `category × mois`, via `dim_product` et `dim_date`.
+- **Réel × budget** : `category × store_key × mois`, via `dim_product`, `dim_store` et `dim_date`.
+- **Inventaire** : `category × store_key × mois` si on compare les niveaux de stock aux ventes ou au budget.
 
-## Notes
+Cette décision évite le produit cartésien : `fact_sales` et `fact_returns` ont chacun plusieurs lignes par produit et par mois. Les joindre directement multiplierait les montants; les agréger séparément conserve les totaux.
 
-**`dim_date [r]×5` dans `fact_order_pipeline`**
-Les cinq jalons utilisent `dim_date` sous des alias distincts :
-`order_date_key`, `payment_date_key`, `pick_date_key`, `ship_date_key`,
-`delivery_date_key`. Une seule table physique, cinq rôles — c'est le
-**role-playing** étudié en S07. Chaque jointure doit avoir un alias distinct
-(`d_order`, `d_ship`, etc.).
+## Règles de conformité
 
-**`dim_segment ◐`**
-`dim_segment` n'est pas jointe directement aux tables de faits. L'accès
-passe par `bridge_customer_segment`. Pour tout calcul de revenu par segment :
-```sql
-SUM(f.line_total * b.weight)   -- pondéré = correct
-SUM(f.line_total)              -- sans weight = double-comptage (FAUX)
-```
-Voir S08.
+1. `dim_product.category` est le libellé de référence pour comparer ventes, retours, inventaire et budget.
+2. `fact_budget.category` reste un `VARCHAR`, mais doit correspondre exactement aux valeurs de `dim_product.category`.
+3. `dim_date` sert à ramener les dates transactionnelles (`date_key`) au mois via `DATE_TRUNC('month', d."date")`.
+4. `dim_store` porte la vérité SCD2 du magasin; les faits utilisent `store_key` pour pointer la bonne version.
+5. Les dimensions `dim_customer` et `dim_channel` sont conformes pour ventes et retours, mais non applicables à budget et inventaire.
 
-**`dim_channel ?` dans `fact_returns`**
-Vérifiez si votre implémentation inclut `channel_key` dans `fact_returns`.
-Si oui, passez `?` à `✓` et documentez la décision. Si non, passez à `—`.
+## Contrôles S07
 
-**`dim_order_profile`**
-Dimension poubelle (*junk*) regroupant les indicateurs discrets de la
-transaction (`transaction_type`, `is_promotional`, etc.). Connectée
-uniquement à `fact_orders_transaction` — grain identique.
+- Requête drill-across : [`sql/integration/s07-drill-across.sql`](../sql/integration/s07-drill-across.sql)
+- Réel-vs-budget : [`sql/integration/s07-actual-vs-budget.sql`](../sql/integration/s07-actual-vs-budget.sql)
+- Réconciliation : [`sql/checks/s07-reconciliation.sql`](../sql/checks/s07-reconciliation.sql)
 
----
-
-## Vérification avant S11
-
-- [ ] Ma `dim_date` partage le même `date_key` entre tous mes faits ?
-- [ ] Chaque `✓` correspond à une FK réelle dans mon schéma DuckDB ?
-- [ ] Les cellules `—` sont-elles justifiées dans `decision-log.md` ?
-- [ ] La matrice est à jour avec mes 7 tables de faits (après S09) ?
-- [ ] Les cellules `?` ont été résolues (`✓` ou `—`) ?
+Les contrôles attendus comparent les totaux directs des tables de faits aux totaux agrégés par CTE. Un écart de `0.00` est requis avant de publier un chiffre au board.

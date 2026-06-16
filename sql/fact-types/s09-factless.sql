@@ -27,41 +27,55 @@ FROM fact_promo_exposure;
 
 
 -- ── Étape 2 : Couverture par campagne ───────────────────────
--- TODO : Combien d'expositions et de clients uniques par campagne ?
+-- Calcule le nombre d'expositions et de clients uniques par campagne.
 --        Quel canal a généré le plus d'expositions pour chaque campagne ?
 
--- [Votre requête ici]
+SELECT
+    campaign_id,
+    COUNT(*)                            AS nb_expositions,
+    COUNT(DISTINCT customer_key)        AS nb_clients_uniques,
+    COUNT(DISTINCT channel_key)         AS nb_canaux,
+    MIN(exposure_date)                  AS premiere_exposition,
+    MAX(exposure_date)                  AS derniere_exposition
+FROM fact_promo_exposure
+GROUP BY 1
+ORDER BY nb_expositions DESC;
 
 
 -- ── Étape 3 : Répartition par canal ─────────────────────────
--- TODO : Calculez le % des expositions par canal.
+-- Calcule le % des expositions par canal.
 --        Jointure : fact_promo_exposure → dim_channel
 
--- [Votre requête ici]
--- Attendu :
--- SELECT dc.channel_name,
---        COUNT(*) AS nb_expositions,
---        ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct_total
--- FROM fact_promo_exposure e
--- JOIN dim_channel dc ON dc.channel_key = e.channel_key
--- GROUP BY 1 ORDER BY nb_expositions DESC;
+SELECT
+    dc.channel_name,
+    COUNT(*)                              AS nb_expositions,
+    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) AS pct_total
+FROM fact_promo_exposure AS e
+INNER JOIN dim_channel AS dc
+    ON dc.channel_key = e.channel_key
+GROUP BY 1
+ORDER BY nb_expositions DESC;
 
 
 -- ── Étape 4 : Requête inverse — clients NON exposés ──────────
--- TODO : Combien de clients actifs n'ont PAS été exposés à une campagne ?
+-- Calcule combien de clients actifs n'ont PAS été exposés à une campagne.
 --        Comparez ce nombre au total de clients actifs.
 --        Jointure : dim_customer (is_current = TRUE)
 
--- [Votre requête ici]
--- Squelette :
--- SELECT
---     (SELECT COUNT(*) FROM dim_customer WHERE is_current = TRUE)
---         AS total_clients_actifs,
---     (SELECT COUNT(*) FROM dim_customer
---      WHERE is_current = TRUE
---        AND customer_key NOT IN (
---            SELECT DISTINCT customer_key FROM fact_promo_exposure
---        )) AS clients_non_exposes;
+SELECT
+    COUNT(*) AS total_clients_actifs,
+    COUNT(*) FILTER (WHERE e.customer_key IS NULL) AS clients_actifs_non_exposes,
+    ROUND(
+        100.0 * COUNT(*) FILTER (WHERE e.customer_key IS NULL) / COUNT(*),
+        1
+    ) AS pct_clients_non_exposes
+FROM dim_customer AS c
+LEFT JOIN (
+    SELECT DISTINCT customer_key
+    FROM fact_promo_exposure
+) AS e
+    ON e.customer_key = c.customer_key
+WHERE c.is_current = TRUE;
 
 
 -- ── Note sur la factless fact ─────────────────────────────────

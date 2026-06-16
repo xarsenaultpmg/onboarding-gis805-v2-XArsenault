@@ -1,23 +1,35 @@
 ============================================
-NexaMart Validation: 0 PASS, 0 FAIL, 19 SKIP
+NexaMart Validation: 31 PASS, 0 FAIL, 0 SKIP
 ============================================
 
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_date does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_product does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_store does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_channel does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_customer does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_date does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_product does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_store does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_channel does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_customer does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name dim_customer does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name fact_sales does not exist!
-[SKIP]  ERROR            'utf-8' codec can't decode byte 0x94 in position 101: invalid start byte
-[SKIP]  MISSING_TABLE    Catalog Error: Table with name bridge_customer_segment does not exist!
+[PASS]  TABLE_EXISTS     dim_date                                       PASS
+[PASS]  TABLE_EXISTS     dim_product                                    PASS
+[PASS]  TABLE_EXISTS     dim_store                                      PASS
+[PASS]  TABLE_EXISTS     dim_customer                                   PASS
+[PASS]  TABLE_EXISTS     dim_channel                                    PASS
+[PASS]  TABLE_EXISTS     fact_sales                                     PASS
+[PASS]  TABLE_EXISTS     fact_returns                                   PASS
+[PASS]  TABLE_EXISTS     fact_budget                                    PASS
+[PASS]  TABLE_EXISTS     fact_daily_inventory                           PASS
+[PASS]  TABLE_EXISTS     fact_order_pipeline                            PASS
+[PASS]  TABLE_EXISTS     dim_order_profile                              PASS
+[PASS]  TABLE_EXISTS     fact_promo_exposure                            PASS
+[PASS]  ROW_COUNT        dim_date                                       PASS
+[PASS]  ROW_COUNT        dim_product                                    PASS
+[PASS]  ROW_COUNT        dim_store                                      PASS
+[PASS]  ROW_COUNT        dim_channel                                    PASS
+[PASS]  ROW_COUNT        dim_customer                                   PASS
+[PASS]  ROW_COUNT        fact_sales                                     PASS
+[PASS]  PK_UNIQUE        dim_date.date_key                              PASS
+[PASS]  PK_UNIQUE        dim_product.product_id                         PASS
+[PASS]  PK_UNIQUE        dim_store.store_id                             PASS
+[PASS]  PK_UNIQUE        dim_channel.channel_id                         PASS
+[PASS]  PK_UNIQUE        dim_customer.customer_key                      PASS
+[PASS]  SCD2_ONE_CURRENT  dim_customer one is_current per customer_id    PASS
+[PASS]  FK_NOT_NULL      fact_sales.product_key                         PASS
+[PASS]  FK_NOT_NULL      fact_sales.store_key                           PASS
+[PASS]  FK_NOT_NULL      fact_sales.customer_key                        PASS
+[PASS]  FK_NOT_NULL      fact_sales.channel_key                         PASS
+[PASS]  GRAIN_UNIQUE     fact_sales (order_number, sale_line_id)        PASS
+[PASS]  RECONCILE        sales_total vs budget_total                    PASS
+[PASS]  BRIDGE_WEIGHT    bridge_customer_segment SUM(weight)=1.0        PASS

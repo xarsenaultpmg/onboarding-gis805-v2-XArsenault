@@ -1,4 +1,4 @@
-.PHONY: help generate load check clean reset
+.PHONY: help generate load check clean reset sql
 
 TEAM_SEED ?= $(shell python scripts/datagen/_compute_seed.py)
 
@@ -13,6 +13,7 @@ help:
 	@echo "  make generate  Generer vos CSVs (deterministe via team seed)"
 	@echo "  make load      Charger CSVs + executer sql/staging,dims,facts,bridges/"
 	@echo "  make check     Lancer validation/checks.sql -> PASS / FAIL / SKIP"
+	@echo "  make sql FILE=sql/analysis/foo.sql  Executer un fichier SQL (sans CLI duckdb)"
 	@echo "  make reset     Supprimer uniquement le .duckdb (garde les CSVs)"
 	@echo "  make clean     Tout supprimer (DB + CSVs + resultats)"
 	@echo "  make help      Afficher cette aide"
@@ -41,6 +42,14 @@ load:
 # ──────────────────────────────────────────────
 check:
 	python src/run_checks.py
+
+# ──────────────────────────────────────────────
+# sql : Exécuter un fichier SQL d'analyse (Python + duckdb, pas besoin du binaire duckdb)
+#       Exemple : make sql FILE=sql/analysis/s02-first-answer.sql
+# ──────────────────────────────────────────────
+sql:
+	@test -n "$(FILE)" || (echo "Usage: make sql FILE=sql/analysis/....sql" && false)
+	python scripts/run_sql.py "$(FILE)"
 
 # ──────────────────────────────────────────────
 # reset : Supprimer UNIQUEMENT la base DuckDB
