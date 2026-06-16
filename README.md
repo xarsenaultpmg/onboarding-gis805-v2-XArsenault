@@ -1,5 +1,10 @@
 # GIS805 — Bienvenue dans votre entrepôt de données
 
+## Identification
+
+- Nom : Xavier Arseault
+- Matricule : 25163368
+
 Vous venez d'accepter votre premier assignment. Ce dépôt est **votre espace de travail** pour tout le trimestre.
 
 > **Lien d'acceptation du devoir :** [https://classroom.github.com/a/Tndi64Pu](https://classroom.github.com/a/Tndi64Pu)
