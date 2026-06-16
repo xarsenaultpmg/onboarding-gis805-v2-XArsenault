@@ -1,18 +1,16 @@
 # Dictionnaire de données — NexaMart
 
-Ce document décrit chaque fichier CSV produit par `make generate`
-et chaque colonne qu'il contient. Il est **régénéré automatiquement**
-par `scripts/regen_data_dictionary.py` à chaque changement d'un
-générateur sous `scripts/datagen/`. Ne le modifiez pas à la main —
-vos ajustements seraient écrasés au prochain build. Pour enrichir
-la description d'une colonne, éditez `COLUMN_DOCS` dans le script
-de régénération.
+Ce document décrit les fichiers CSV produits par `make generate` et les tables
+d'entrepôt construites dans DuckDB par `.\run.ps1 load`. Les sections CSV
+documentent les sources brutes ; la section finale documente les tables
+analytiques `dim_*`, `fact_*` et `bridge_*` utilisées dans les briefs.
 
 ## Lecture
 
 - `team_N` = votre numéro d'équipe, calculé depuis votre username GitHub.
 - Les tables `raw_*` dans DuckDB sont chargées depuis ces CSV par `make load`.
-- Les colonnes marquées `_TODO` n'ont pas encore de description — signalez-le si vous en rencontrez une.
+- Les tables `dim_*`, `fact_*` et `bridge_*` sont la couche à utiliser pour les
+  analyses. Les CSV ne doivent pas être lus directement dans les briefs.
 
 ## Dimensions conformées partagées
 
@@ -403,3 +401,223 @@ de régénération.
 | `campaign_id` | Clé naturelle de la campagne (CMP-NNN). |
 | `customer_id` | Clé naturelle du client (CUS-NNNNN). |
 | `channel_id` | Clé naturelle du canal (CH-WEB, CH-APP, etc.). |
+
+## Tables d'entrepôt DuckDB
+
+### Dimensions
+
+#### `dim_date`
+
+| Colonne | Description business |
+|---|---|
+| `date_key` | Clé substitutive de la date utilisée par les faits. |
+| `date` | Jour calendaire au format date, issu de `raw_dim_date.date_key`. |
+| `year` | Année civile. |
+| `quarter` | Trimestre civil. |
+| `month` | Numéro de mois. |
+| `month_name` | Nom du mois pour affichage. |
+| `week_iso` | Semaine ISO. |
+| `day_of_week` | Jour de semaine numérique. |
+| `day_name` | Nom du jour pour affichage. |
+| `is_weekend` | Indique samedi ou dimanche. |
+| `loaded_at` | Date de chargement technique de la dimension. |
+
+#### `dim_product`
+
+| Colonne | Description business |
+|---|---|
+| `product_key` | Clé substitutive du produit. |
+| `product_id` | Clé naturelle du produit source. |
+| `name` | Nom commercial du produit. |
+| `category` | Catégorie de référence pour drill-across avec budget. |
+| `subcategory` | Sous-catégorie produit. |
+| `brand` | Marque. |
+| `unit_cost` | Coût unitaire utilisé pour calculer le coût des ventes. |
+| `unit_price` | Prix de référence avant rabais. |
+| `loaded_at` | Date de chargement technique. |
+
+#### `dim_customer`
+
+| Colonne | Description business |
+|---|---|
+| `customer_key` | Clé substitutive d'une version SCD2 du client. |
+| `customer_id` | Clé naturelle du client source. |
+| `name` | Nom client après corrections Type 1. |
+| `segment` | Segment de fidélité historisé. |
+| `city` | Ville client historisée. |
+| `région` | Province client historisée dans le modèle courant. |
+| `valid_from` | Début de validité de la version client. |
+| `valid_to` | Fin de validité de la version client, ou `NULL` si courante. |
+| `is_current` | Indique la version courante du client. |
+| `loaded_at` | Date de chargement technique. |
+
+#### `dim_store`
+
+| Colonne | Description business |
+|---|---|
+| `store_key` | Clé substitutive d'une version SCD2 du magasin. |
+| `store_id` | Clé naturelle du magasin source. |
+| `name` | Nom du magasin. |
+| `city` | Ville du magasin. |
+| `région` | Région administrative historisée. |
+| `province` | Province du magasin. |
+| `store_type` | Type courant du magasin après écrasement Type 1. |
+| `valid_from` | Début de validité de la version magasin. |
+| `valid_to` | Fin de validité de la version magasin, ou `NULL` si courante. |
+| `is_current` | Indique la version courante du magasin. |
+| `loaded_at` | Date de chargement technique. |
+
+#### `dim_channel`
+
+| Colonne | Description business |
+|---|---|
+| `channel_key` | Clé substitutive du canal. |
+| `channel_id` | Clé naturelle du canal source. |
+| `channel_name` | Libellé du canal. |
+| `channel_type` | Famille du canal : en ligne, physique ou téléphone. |
+| `loaded_at` | Date de chargement technique. |
+
+#### `dim_order_profile`
+
+| Colonne | Description business |
+|---|---|
+| `profile_key` | Clé substitutive du profil de commande. |
+| `is_gift_wrapped` | Indique une commande avec emballage cadeau. |
+| `is_express_shipping` | Indique une livraison express. |
+| `is_loyalty_redeemed` | Indique une utilisation de points de fidélité. |
+| `is_promo_applied` | Indique une promotion appliquée. |
+| `is_employee_purchase` | Indique un achat employé. |
+| `is_online_pickup` | Indique un ramassage en magasin après commande en ligne. |
+| `is_fragile` | Indique un article fragile. |
+| `is_oversized` | Indique un article hors gabarit. |
+| `profile_name` | Libellé business de la combinaison de drapeaux. |
+
+#### `dim_segment_outrigger`
+
+| Colonne | Description business |
+|---|---|
+| `segment_key` | Clé substitutive du segment. |
+| `segment` | Segment de fidélité. |
+| `discount_pct` | Rabais associé au segment. |
+| `free_shipping` | Indique si le segment obtient la livraison gratuite. |
+| `priority_support` | Indique si le segment reçoit un support prioritaire. |
+| `annual_reward_value` | Valeur annuelle estimée des récompenses du segment. |
+
+#### `dim_customer_scd3`
+
+| Colonne | Description business |
+|---|---|
+| `customer_key` | Clé de la version courante du client. |
+| `customer_id` | Clé naturelle du client. |
+| `name` | Nom client courant. |
+| `current_segment` | Segment actuel. |
+| `previous_segment` | Segment précédent, conservé pour l'analyse de transition. |
+| `segment_change_date` | Date du dernier changement de segment. |
+| `city` | Ville courante du client. |
+| `province` | Province courante du client. |
+
+### Tables de faits
+
+#### `fact_sales`
+
+| Colonne | Description business |
+|---|---|
+| `product_key`, `customer_key`, `store_key`, `date_key`, `channel_key` | Clés conformes vers les dimensions principales. |
+| `profile_key` | Profil opérationnel de la commande. |
+| `sale_line_id` | Identifiant de la ligne de vente, grain de la table. |
+| `order_number` | Numéro de commande conservé comme dimension dégénérée. |
+| `revenue` | Revenu net de la ligne après rabais. |
+| `line_total` | Alias conservé pour les checks et la compatibilité des requêtes. |
+| `quantity` | Quantité vendue. |
+| `discount_amount` | Montant de rabais en dollars. |
+| `cost` | Coût estimé de la ligne. |
+
+#### `fact_returns`
+
+| Colonne | Description business |
+|---|---|
+| `product_key`, `customer_key`, `store_key`, `date_key`, `channel_key` | Clés conformes pour comparer les retours aux ventes. |
+| `return_id` | Identifiant de la ligne de retour. |
+| `original_sale_line_id` | Référence à la ligne de vente retournée. |
+| `return_date` | Date du retour. |
+| `return_reason` | Motif du retour. |
+| `return_quantity` | Quantité retournée. |
+| `refund_amount` | Montant remboursé. |
+
+#### `fact_inventory_snapshot`
+
+| Colonne | Description business |
+|---|---|
+| `date_key`, `product_key`, `store_key` | Clés conformes du snapshot. |
+| `snapshot_id` | Identifiant du snapshot. |
+| `snapshot_date` | Date de la photo d'inventaire. |
+| `quantity_on_hand` | Stock disponible au jour du snapshot. |
+| `quantity_on_order` | Stock commandé mais pas encore reçu. |
+| `reorder_point` | Seuil de réapprovisionnement. |
+
+#### `fact_budget`
+
+| Colonne | Description business |
+|---|---|
+| `date_key`, `store_key` | Clés conformes mois et magasin. |
+| `budget_id` | Identifiant de la ligne budgétaire. |
+| `budget_month` | Mois budgétaire. |
+| `category` | Catégorie produit au grain budget. |
+| `target_revenue` | Revenu cible. |
+| `target_quantity` | Unités cibles. |
+
+#### `fact_orders_transaction`
+
+| Colonne | Description business |
+|---|---|
+| `date_key`, `product_key`, `store_key`, `customer_key` | Clés conformes de la transaction. |
+| `transaction_id` | Identifiant atomique de transaction. |
+| `transaction_date` | Date de la transaction. |
+| `transaction_type` | Type d'événement : vente, retour ou échange. |
+| `quantity` | Quantité de la transaction. |
+| `amount` | Montant de la transaction, négatif pour certains retours. |
+
+#### `fact_daily_inventory`
+
+| Colonne | Description business |
+|---|---|
+| `date_key`, `product_key`, `store_key` | Clés conformes du snapshot quotidien. |
+| `snapshot_id` | Identifiant du snapshot quotidien. |
+| `snapshot_date` | Date du snapshot. |
+| `quantity_on_hand` | Stock disponible au jour donné. |
+| `quantity_on_order` | Stock commandé. |
+| `days_of_supply` | Jours de couverture au rythme de vente courant. |
+
+#### `fact_order_pipeline`
+
+| Colonne | Description business |
+|---|---|
+| `order_date_key`, `product_key`, `store_key`, `customer_key` | Clés conformes de la commande suivie. |
+| `pipeline_id` | Identifiant de la ligne de pipeline. |
+| `order_id` | Identifiant de commande, grain de la table. |
+| `order_date`, `payment_date`, `pick_date`, `ship_date`, `delivery_date` | Jalons du cycle de vie de la commande. |
+| `current_status` | Statut courant dans le pipeline. |
+| `days_order_to_deliver` | Délai commande vers livraison pour les commandes livrées. |
+| `reached_payment`, `reached_pick`, `reached_ship`, `reached_delivery` | Flags indiquant les jalons atteints. |
+
+#### `fact_promo_exposure`
+
+| Colonne | Description business |
+|---|---|
+| `date_key`, `customer_key`, `channel_key` | Clés conformes de l'exposition. |
+| `exposure_id` | Identifiant de l'exposition. |
+| `exposure_date` | Date d'exposition à la campagne. |
+| `campaign_id` | Identifiant de campagne conservé comme dimension dégénérée. |
+
+### Ponts
+
+#### `bridge_customer_segment`
+
+| Colonne | Description business |
+|---|---|
+| `bridge_id` | Identifiant de la ligne du pont. |
+| `customer_key` | Version client reliée au segment. |
+| `segment_key` | Segment relié au client. |
+| `weight` | Poids d'attribution du client au segment ; la somme doit valoir 1.0 par client. |
+| `effective_date` | Date d'entrée en vigueur de l'appartenance. |
+| `is_primary` | Segment principal pour les rapports non pondérés, à utiliser avec prudence. |
