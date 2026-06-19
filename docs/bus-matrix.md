@@ -1,4 +1,4 @@
-# Bus Matrix — NexaMart S10
+# Bus Matrix — NexaMart S11
 
 Cette matrice montre quelles dimensions sont conformes entre les processus
 NexaMart. Une case `X` signifie que la table de faits porte une FK vers la
@@ -32,6 +32,17 @@ processus.
   dans la table pour les délais, mais ne sont pas encore des role-playing FK.
 - `fact_promo_exposure.campaign_id` est une dimension dégénérée. Il n'existe
   pas de `dim_campaign` dans le modèle courant.
+
+## Pont et outrigger segment
+
+| Artefact | Rôle | Accès depuis les faits |
+|---|---|---|
+| `bridge_customer_segment` | Relie un `customer_key` à un ou plusieurs `segment_key` avec un `weight` dont la somme vaut 1.0 par client | Joindre via `customer_key` depuis tout fait transactionnel client |
+| `dim_segment_outrigger` | Attributs descriptifs du segment (rabais, livraison gratuite, etc.) | `bridge_customer_segment.segment_key` → `dim_segment_outrigger.segment_key` |
+
+Les cases `~` sur `dim_segment_outrigger` dans la matrice ci-dessus signalent cette
+conformité indirecte. Ne jamais joindre le pont aux faits sans appliquer `weight`
+lorsque l'objectif est un montant financier réconciliable.
 
 ## Grains communs recommandés
 
@@ -67,6 +78,8 @@ processus.
 - Allocation pondérée S08 : [`sql/bridges/s08-weighted-allocation.sql`](../sql/bridges/s08-weighted-allocation.sql)
 - Réconciliation du pont : [`sql/checks/s08-weighted-reconciliation.sql`](../sql/checks/s08-weighted-reconciliation.sql)
 - Analyses S09 : [`sql/fact-types/`](../sql/fact-types/)
+- KPIs officiels testés : [`docs/metric-definitions.md`](metric-definitions.md)
 
 Un chiffre destiné au board doit toujours pouvoir être relié à une requête de
-réconciliation ou à une règle de grain documentée ci-dessus.
+réconciliation, à une règle de grain documentée ci-dessus ou à un KPI défini dans
+`docs/metric-definitions.md`.

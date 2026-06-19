@@ -154,17 +154,34 @@ retenue, les alternatives écartées et les conséquences pour les analyses.
   `sql/fact-types/s09-accumulating.sql`,
   `sql/fact-types/s09-factless.sql`.
 
+### D08 — Publier quatre KPI officiels testés pour le handoff S11
+
+- **Date / séance :** 2026-06-18 (S11, après revue par les pairs S10)
+- **Contexte :** La revue S10 (Charles Narbonne Merineau) a confirmé la clarté
+  du modèle, mais le pack manquait de `metric-definitions.md` avec formules
+  exécutables et valeurs observées. Sans cela, le CFO ne peut pas définir
+  « revenu », « taux de retour » ou « couverture promo » sans ambiguïté.
+- **Décision :** Documenter quatre KPIs couvrant `fact_sales`, `fact_returns`,
+  `fact_order_pipeline` et `fact_promo_exposure`, chacun testé sur DuckDB local.
+- **Alternatives écartées :**
+  - KPIs uniquement depuis `fact_sales` : ne démontre pas la portée multi-faits.
+  - Formules sans valeur observée : non livrables pour S11 selon le guide S10.
+- **Conséquences :** Les briefs S11 et la défense S12 s'appuient sur
+  `docs/metric-definitions.md` comme source canonique des définitions.
+- **Révisable si :** Finance impose une définition différente de revenu net ou si
+  de nouvelles sources ajoutent taxes, frais ou conversions promo.
+- **Références :** `docs/metric-definitions.md`, `docs/board-briefs/Charles_peer-review-3.md`,
+  `sql/integration/s07-drill-across.sql`, `sql/fact-types/s09-factless.sql`.
+
 ## Décisions en attente
 
-- Définir en S11 les KPI officiels dans `docs/metric-definitions.md`, avec
-  formule SQL, grain, source et fréquence pour chaque métrique.
 - Décider si les dates de jalon de `fact_order_pipeline` doivent devenir des
   role-playing FK vers `dim_date` ou rester des colonnes de délai dans le fait.
 
 ## Décisions revisitées
 
-- Aucune décision n'est supersédée au 2026-06-15. Les choix ci-dessus restent
-  cohérents avec les briefs S02 à S09 et la préparation S10.
+- Aucune décision n'est supersédée au 2026-06-18. Les choix ci-dessus restent
+  cohérents avec les briefs S02 à S09 et le handoff pack S11.
 
 ---
 

@@ -103,4 +103,24 @@
   - La factless `fact_promo_exposure` contient **132 expositions**; **170 clients actifs sur 285** n'ont pas été exposés (**59,6 %**).
 - **Justification :** Accélérer la production des livrables S09 tout en respectant la stratégie de sprints incrémentaux et en validant les chiffres directement dans DuckDB avant de les intégrer au brief.
 
+### 2026-06-16 — Séance S10
+- **Modèle :** Cursor / agent GPT-5.5
+- **Prompt :** « Aide-moi à compléter la revue de pairs Jalon 3 (peer-review-3.md) sur le pack documentation de Charles, puis à identifier les améliorations à appliquer à mon propre handoff pack avant S11. »
+- **Résultat :** L'agent a aidé à rédiger la grille d'évaluation dans `docs/peer-reviews/peer-review-3.md` et à lister les points à renforcer : additivité mesure par mesure, politique NULL formalisée, symboles `~` dans la bus matrix, et création de `metric-definitions.md`.
+- **Validation :**
+  - J'ai relu les documents Charles dans `docs/board-briefs/Charles_*.md` avant de noter chaque critère.
+  - J'ai refusé la suggestion d'attribuer « Excellent » à la validation sans avoir vu `metric-definitions.md` chez Charles — j'ai gardé « Satisfaisant » avec justification explicite.
+  - J'ai intégré les retours reçus de Charles (`Charles_peer-review-3.md`) : ajout des KPIs testés comme priorité S11.
+- **Justification :** Structurer la revue par les pairs et traduire les findings en actions concrètes pour mon propre pack, sans copier le contenu du pair.
+
+### 2026-06-18 — Séance S11
+- **Modèle :** Cursor / agent GPT-5.5
+- **Prompt :** « Implémente le plan S11 : polish du handoff pack (model card, bus matrix, decision log), valide les KPIs sur DuckDB, complète `answers/S11_executive_brief.md`, mets à jour `ai-usage.md`, puis lance `.\run.ps1 check` et committe. »
+- **Résultat :** L'agent a ajouté la section politique NULL à la model card, complété la bus matrix S11 (pont/outrigger), finalisé le brief exécutif S11 avec preuve SQL et entrées D08, et préparé la remise.
+- **Validation :**
+  - J'ai exécuté les quatre requêtes KPI sur `db/nexamart.duckdb` : revenu jan 2025 = **62 630,86 $**, livraison = **70,2 %**, couverture promo = **46,3 %**, pic retour Automotive = **21,42 %**.
+  - `.\run.ps1 check` : **31 PASS, 0 FAIL, 0 SKIP**.
+  - J'ai relu le brief S11 pour confirmer que chaque réponse du test de relais correspond aux docs finaux.
+- **Justification :** Accélérer la formalisation du handoff pack final tout en validant chaque chiffre et chaque check avant remise au CEO.
+
 <!-- Ajoutez vos entrées ci-dessous -->

@@ -1,11 +1,11 @@
 # Définitions de métriques — NexaMart
 
 > **Minimum 4 KPIs couvrant au moins 2 tables de faits différentes.**
-> Ce document complète votre handoff pack : il traduit vos requêtes SQL en
-> KPIs compréhensibles par le CEO.
+> Ce document complète le handoff pack : il traduit les requêtes SQL en KPIs
+> compréhensibles par le CEO.
 >
-> Chaque formule SQL doit être **testée sur votre DuckDB** avant la remise S11.
-> Un KPI sans valeur observée est un KPI non livrable.
+> Chaque formule a été **testée sur `db/nexamart.duckdb`** (seed local
+> `xarsenaultpmg`) le 2026-06-18, après retour de revue par les pairs S10.
 
 ## Format d'une entrée
 
@@ -19,35 +19,67 @@
 
 ---
 
-## KPIs de votre modèle
+## KPIs officiels
 
 | Nom | Définition business | Formule SQL (grain explicite) | Source | Fréquence |
 |---|---|---|---|---|
-| **Revenu net mensuel** | Montant total facturé aux clients en CAD par mois — base de toute décision de pricing et de performance | `SELECT d.year_month, ROUND(SUM(s.line_total), 2) AS net_revenue FROM fact_sales s JOIN dim_date d ON d.date_key = s.date_key GROUP BY d.year_month ORDER BY d.year_month` | `fact_sales`, `dim_date` | Mensuel |
-| **Taux de livraison** | % de commandes ayant franchi le jalon livraison — mesure directe de l'efficacité opérationnelle entrepôt | `SELECT ROUND(100.0 * COUNT(delivery_date) / NULLIF(COUNT(*), 0), 1) AS pct_delivery FROM fact_order_pipeline` | `fact_order_pipeline` | Quotidien |
-| <!-- KPI 3 : nom --> | <!-- Ce que le CEO décide avec ce chiffre → pas de jargon technique --> | <!-- SELECT ... FROM fact_* JOIN dim_* ... GROUP BY ... --> | <!-- fact_* + dim_* --> | <!-- Quotidien / Hebdo / Mensuel / Trimestriel --> |
-| <!-- KPI 4 : nom --> | <!-- définition business --> | <!-- formule SQL complète, grain explicite --> | <!-- source --> | <!-- fréquence --> |
+| **Revenu net mensuel** | Montant total facturé aux clients en CAD par mois — base de toute décision de pricing et de performance | `SELECT DATE_TRUNC('month', d."date") AS mois, ROUND(SUM(s.line_total), 2) AS net_revenue FROM fact_sales AS s JOIN dim_date AS d ON d.date_key = s.date_key GROUP BY 1 ORDER BY 1` | `fact_sales`, `dim_date` | Mensuel |
+| **Taux de livraison pipeline** | Part des commandes suivies qui ont atteint le jalon livraison — mesure l'efficacité opérationnelle entrepôt | `SELECT ROUND(100.0 * COUNT(delivery_date) / NULLIF(COUNT(*), 0), 1) AS pct_delivery FROM fact_order_pipeline` | `fact_order_pipeline` | Quotidien |
+| **Taux de retour par catégorie et mois** | Part du revenu remboursée par catégorie et par mois — signale qualité produit ou problème logistique sans joindre ventes et retours ligne à ligne | Voir requête complète ci-dessous (`refund_rate_pct`) | `fact_sales`, `fact_returns`, `dim_product`, `dim_date` | Mensuel |
+| **Couverture promo clients actifs** | Part des clients courants exposés à au moins une campagne — mesure la portée marketing sans confondre exposition et achat | `SELECT ROUND(100.0 * COUNT(DISTINCT e.customer_key) / NULLIF((SELECT COUNT(*) FROM dim_customer WHERE is_current = TRUE), 0), 1) AS pct_clients_actifs_exposes FROM fact_promo_exposure AS e` | `fact_promo_exposure`, `dim_customer` | Hebdomadaire |
 
-> **Idées pour KPI 3 et 4 :**
-> - Revenu par segment de fidélité (`fact_sales` × `bridge_customer_segment` × `dim_segment_outrigger`)
-> - Couverture campagne — % de clients actifs exposés (`fact_promo_exposure` + anti-jointure)
-> - Stock moyen par magasin (`fact_daily_inventory` grain produit×magasin×jour → `AVG`, jamais `SUM`)
-> - Taux de retour (`COUNT(fact_returns) / COUNT(fact_sales)` par catégorie)
-> - Délai moyen pick → ship en jours (`fact_order_pipeline`, jalons `pick_date` et `ship_date`)
-> - Écart réel vs cible (`fact_sales` drill-across `fact_budget` via `dim_store` et `dim_date`)
+### Détail — Taux de retour par catégorie et mois
+
+Grain commun : **catégorie × mois**. Chaque fait est agrégé séparément avant jointure
+(voir `sql/integration/s07-drill-across.sql`).
+
+```sql
+WITH sales_agg AS (
+    SELECT
+        p.category,
+        DATE_TRUNC('month', d."date") AS mois,
+        ROUND(SUM(f.line_total), 2) AS revenue
+    FROM fact_sales AS f
+    INNER JOIN dim_product AS p ON f.product_key = p.product_key
+    INNER JOIN dim_date AS d ON f.date_key = d.date_key
+    GROUP BY 1, 2
+),
+returns_agg AS (
+    SELECT
+        p.category,
+        DATE_TRUNC('month', d."date") AS mois,
+        ROUND(SUM(r.refund_amount), 2) AS total_refunds
+    FROM fact_returns AS r
+    INNER JOIN dim_product AS p ON r.product_key = p.product_key
+    INNER JOIN dim_date AS d ON r.date_key = d.date_key
+    GROUP BY 1, 2
+)
+SELECT
+    COALESCE(s.category, r.category) AS category,
+    COALESCE(s.mois, r.mois) AS mois,
+    COALESCE(s.revenue, 0) AS revenue,
+    COALESCE(r.total_refunds, 0) AS total_refunds,
+    ROUND(
+        100.0 * COALESCE(r.total_refunds, 0) / NULLIF(COALESCE(s.revenue, 0), 0),
+        2
+    ) AS refund_rate_pct
+FROM sales_agg AS s
+FULL OUTER JOIN returns_agg AS r
+    ON s.category = r.category AND s.mois = r.mois
+WHERE COALESCE(s.revenue, 0) > 0
+ORDER BY refund_rate_pct DESC NULLS LAST;
+```
 
 ---
 
-## Valeurs observées (à remplir avant soumission)
+## Valeurs observées (seed `xarsenaultpmg`, 2026-06-18)
 
-Exécutez chaque formule et notez le chiffre clé obtenu :
-
-| KPI | Valeur observée sur votre DuckDB | Testé ? |
+| KPI | Valeur observée sur DuckDB | Testé ? |
 |---|---|---|
-| Revenu net mensuel | ex. `2026-01 : 87 432,50 $` | [ ] |
-| Taux de livraison | ex. `70,4 %` | [ ] |
-| KPI 3 | | [ ] |
-| KPI 4 | | [ ] |
+| Revenu net mensuel | `2025-01 : 62 630,86 $` ; `2025-12 : 54 228,47 $` | [x] |
+| Taux de livraison pipeline | `70,2 %` | [x] |
+| Taux de retour par catégorie et mois | `Automotive / 2025-03 : 21,42 %` (pic observé) | [x] |
+| Couverture promo clients actifs | `46,3 %` (132 clients exposés sur clients courants) | [x] |
 
 ---
 
@@ -55,5 +87,25 @@ Exécutez chaque formule et notez le chiffre clé obtenu :
 
 1. **Grain explicite** — la formule doit indiquer le niveau d'agrégation. `SUM(revenue)` seul n'est pas un KPI livrable. `SUM(revenue) GROUP BY dim_date.month` l'est.
 2. **Alias clairs** — chaque colonne de résultat doit avoir un alias lisible (`AS net_revenue`, pas `AS col1`).
-3. **NULLs traités** — utilisez `NULLIF(COUNT(*), 0)` pour éviter la division par zéro. Documentez comment les NULLs sont interprétés.
-4. **Au moins 2 tables de faits différentes** — si vos 4 KPIs viennent tous de `fact_sales`, vous n'avez pas démontré la portée de votre modèle.
+3. **NULLs traités** — utilisez `NULLIF(COUNT(*), 0)` pour éviter la division par zéro. Les dates NULL du pipeline signifient « jalon non atteint », pas erreur de chargement.
+4. **Au moins 2 tables de faits différentes** — les 4 KPIs ci-dessus couvrent `fact_sales`, `fact_returns`, `fact_order_pipeline` et `fact_promo_exposure`.
+5. **Références croisées** — voir aussi `docs/model-card.md` (grains et additivité), `docs/bus-matrix.md` (grains communs) et `docs/decision-log.md` (D05 drill-across, D07 types de faits).
+
+---
+
+## KPI complémentaire (segment pondéré)
+
+Non requis pour la remise S11, mais utile pour le board S08 :
+
+```sql
+SELECT
+    seg.segment,
+    ROUND(SUM(f.line_total * b.weight), 2) AS revenue_weighted
+FROM fact_sales AS f
+JOIN bridge_customer_segment AS b ON b.customer_key = f.customer_key
+JOIN dim_segment_outrigger AS seg ON seg.segment_key = b.segment_key
+GROUP BY 1
+ORDER BY revenue_weighted DESC;
+```
+
+Valeur observée : segment `Platinum` = `136 376,28 $` (attribution pondérée, réconciliable au total ventes).

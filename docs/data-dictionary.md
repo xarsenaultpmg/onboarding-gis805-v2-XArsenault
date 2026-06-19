@@ -5,6 +5,10 @@ d'entrepôt construites dans DuckDB par `.\run.ps1 load`. Les sections CSV
 documentent les sources brutes ; la section finale documente les tables
 analytiques `dim_*`, `fact_*` et `bridge_*` utilisées dans les briefs.
 
+Pour les KPIs officiels du handoff S11 (formule SQL, grain, fréquence et valeurs
+observées sur DuckDB), voir [`docs/metric-definitions.md`](metric-definitions.md).
+Les colonnes analytiques DuckDB ci-dessous complètent les CSV sources bruts.
+
 ## Lecture
 
 - `team_N` = votre numéro d'équipe, calculé depuis votre username GitHub.
