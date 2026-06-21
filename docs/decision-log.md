@@ -154,15 +154,16 @@ retenue, les alternatives écartées et les conséquences pour les analyses.
   `sql/fact-types/s09-accumulating.sql`,
   `sql/fact-types/s09-factless.sql`.
 
-### D08 — Publier quatre KPI officiels testés pour le handoff S11
+### D08 — Publier cinq KPI officiels testés pour le handoff S11
 
 - **Date / séance :** 2026-06-18 (S11, après revue par les pairs S10)
 - **Contexte :** La revue S10 (Charles Narbonne Merineau) a confirmé la clarté
   du modèle, mais le pack manquait de `metric-definitions.md` avec formules
   exécutables et valeurs observées. Sans cela, le CFO ne peut pas définir
   « revenu », « taux de retour » ou « couverture promo » sans ambiguïté.
-- **Décision :** Documenter quatre KPIs couvrant `fact_sales`, `fact_returns`,
-  `fact_order_pipeline` et `fact_promo_exposure`, chacun testé sur DuckDB local.
+- **Décision :** Documenter cinq KPIs couvrant `fact_sales`, `fact_returns`,
+  `fact_budget`, `fact_order_pipeline` et `fact_promo_exposure`, chacun testé
+  sur DuckDB local. Le revenu mensuel exclut les retours (KPI séparé).
 - **Alternatives écartées :**
   - KPIs uniquement depuis `fact_sales` : ne démontre pas la portée multi-faits.
   - Formules sans valeur observée : non livrables pour S11 selon le guide S10.

@@ -8,7 +8,7 @@
 
 Oui. Le handoff pack couvre la structure du modèle (8 tables de faits, grains,
 SCD et ponts), les décisions de conception en langage d'affaires, le
-dictionnaire de données, et quatre KPIs testés sur DuckDB. Une personne qui
+dictionnaire de données, et cinq KPIs testés sur DuckDB. Une personne qui
 clone le dépôt peut reconstruire l'entrepôt avec `.\run.ps1 generate`, `load`
 et `check`, puis reproduire les métriques sans assistance. La seule lacune
 connue est l'absence de pipeline ELT automatisé — le rechargement reste manuel
@@ -27,6 +27,9 @@ via les scripts du cours.
 - `docs/decision-log.md` — huit décisions (D01–D08) reliant grain, SCD,
   drill-across, pont pondéré, types de faits S09 et KPIs officiels aux
   questions CEO du trimestre.
+- `docs/metric-definitions.md` — cinq KPIs officiels (revenu, retours,
+  livraison, promo, écart budget) avec formule SQL, grain, fréquence et
+  valeurs observées sur le seed local.
 
 ## Test du passage de relais
 
@@ -53,10 +56,12 @@ via les scripts du cours.
    `GRAIN_UNIQUE` et `BRIDGE_WEIGHT`.
 
 5. Qui est le propriétaire fonctionnel de chaque fait ?
-   → Ventes et transactions : VP Commerce. Retours : VP Service client.
-   Inventaire (snapshots S07/S09) : VP Supply chain. Budget : CFO / Finance.
-   Pipeline commandes : VP Opérations / Fulfillment. Expositions promo :
-   VP Marketing.
+   → `fact_sales`, `fact_orders_transaction` : VP Commerce.
+   `fact_returns` : VP Service client.
+   `fact_inventory_snapshot`, `fact_daily_inventory` : VP Supply chain.
+   `fact_budget` : CFO / Finance.
+   `fact_order_pipeline` : VP Opérations / Fulfillment.
+   `fact_promo_exposure` : VP Marketing.
 
 ## Preuve — KPI principal
 
@@ -76,13 +81,12 @@ ORDER BY 1;
 |---|---|---|
 | `net_revenue` (2025-01) | 62 630,86 $ | Revenu facturé en janvier 2025 sur le seed local — base comparable mois par mois pour le board |
 | `net_revenue` (2025-12) | 54 228,47 $ | Dernier mois complet du jeu de données ; baisse observable pour prioriser l'analyse saisonnière |
-| `pct_delivery` (pipeline) | 70,2 % | 301 commandes livrées sur 429 suivies — KPI opérationnel complémentaire testé le même jour |
 
 ## Réponse au CEO
 
 L'entrepôt est transmissible. Les quatre documents de documentation, le journal
 de décisions et les définitions de métriques permettent à l'équipe BI de
-reproduire revenu net, taux de retour, taux de livraison et couverture promo
-sans appeler le Head of Data. La prochaine priorité serait d'industrialiser le
-rechargement avec un pipeline dbt (GIS806), une fois les définitions KPI
-figées comme contrat sémantique.
+reproduire revenu facturé, taux de retour, taux de livraison, couverture promo
+et écart réel vs budget sans appeler le Head of Data. La prochaine priorité
+serait d'industrialiser le rechargement avec un pipeline dbt (GIS806), une fois
+les définitions KPI figées comme contrat sémantique.

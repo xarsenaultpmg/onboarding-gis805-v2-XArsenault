@@ -1,7 +1,7 @@
 # Model Card — entrepôt NexaMart
 
 Cette model card documente l'entrepôt analytique NexaMart tel qu'il existe
-après S09. Elle sert à un analyste junior qui doit comprendre le modèle,
+au handoff S11 (v0.11). Elle sert à un analyste junior qui doit comprendre le modèle,
 ses grains, ses limites et ses règles de validation sans relire tout le SQL.
 
 ## 1. Identification
