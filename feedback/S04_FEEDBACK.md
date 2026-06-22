@@ -1,6 +1,6 @@
 # Rétroaction automatisée -- S04 (Panier d'achat et drapeaux : les patterns que l'étoile simple ne couvre pas)
 
-_Générée le 2026-05-29T13:01:55+00:00 -- Run `20260529T125427Z-dfc5d65b`_
+_Générée le 2026-06-22T15:11:08+00:00 -- Run `20260622T150322Z-f6a7bca4`_
 
 Ce document est produit par un pipeline reproductible (validation automatique du livrable + analyse LLM du brief et de la déclaration IA). Une revue humaine précède toujours sa publication. **À ce stade expérimental, aucune note ni étiquette de niveau n'est diffusée : l'objectif est purement formatif.**
 
@@ -34,33 +34,33 @@ LIMIT 8;
 
 ## 2. Rétroaction pédagogique sur le brief
 
-> Le brief présente un modèle dimensionnel clair avec preuves SQL solides et recommandations opérationnelles actionnables. Améliorer la traçabilité du processus (commits + note IA) et ajouter KPI attendus pour cadrer les tests.
+> Brief solide et orienté décisionnel : modèle bien justifié (junk dim & dégénérée), validations exécutées et recommandations actionnables. Améliorer la traçabilité des décisions (commits + note IA) et détailler quelques tests limites pour renforcer la confiance opérationnelle.
 
 ### Observations par dimension
 
 **Model quality**
-- Observation : Le brief indique un grain clair (clé composite order_number + sale_line_id), définit une junk dimension dim_order_profile avec 8 flags et justifie le choix par la couverture réelle (99 profils observés sur 256 possibles).
-- Piste d'amélioration : Ajouter un diagramme simple (ERD) montrant les relations fact_sales ↔ dim_order_profile et les clés pour faciliter la revue structurelle.
+- Observation : « Les commandes opérationnelles ne se lisent pas en huit colonnes booléennes. Sur notre seed, 99 profils distincts existent réellement (sur 256 combinaisons théoriques). » — justification et choix de junk dimension exposés.
+- Piste d'amélioration : Ajouter un schéma graphique (ERD) montrant les clés et exemples de valeurs de profile_key pour faciliter la revue technique par l'équipe.
 
 **Validation quality**
-- Observation : Le document fournit des requêtes SQL de validation et des checks : grain unique (3 000 lignes, grain_unique_fact_sales PASS), existence de dim_order_profile (99 lignes) et couverture profile_key (755/934 ~81%).
-- Piste d'amélioration : Inclure un test automatique pour les cas limites (NULL profile_key) et un assert sur la distribution attendue des pairs produits pour détecter régressions.
+- Observation : « Grain fact_sales : 3 000 lignes, clé composite (order_number, sale_line_id) unique (grain_unique_fact_sales PASS). » — contrôles exécutés et résultats reportés.
+- Piste d'amélioration : Compléter les tests en montrant explicitement le traitement des NULLs pour profile_key dans la requête principale et un test d'intégrité pour sommes/aggrégats extrêmes.
 
 **Executive justification**
-- Observation : La section 'Réponse exécutive' présente des actions claires pour le VP Opérations (prioriser fragile et employé) et une recommandation merchandising basée sur co-occurrence produit, en langage décisionnel.
-- Piste d'amélioration : Ajouter un KPI quantitatif attendu pour chaque action (ex. réduction du time-to-pick de X %, hausse du taux d'attachement de Y %) pour cadrer l'expérimentation.
+- Observation : « Décision proposée au VP Opérations : renforcer capacité picking/livraison pour les profils fragile et employé ; lancer un test merchandising Home & Garden + Books & Media en bundle. » — recommandation claire et actionnable.
+- Piste d'amélioration : Ajouter un chiffrage d'impact rapide (coût estimé vs. gain attendu ou KPI à suivre) pour prioriser la mise en œuvre.
 
 **Process trace**
-- Observation : Le brief documente la pipeline (make generate/load/check) mais n'inclut pas d'historique git incrémental ni de note IA détaillée.
-- Piste d'amélioration : Ajouter l'historique git avec ≥3 commits significatifs et une note IA précisant outil/usage et validations humaines effectuées.
+- Observation : « Pipeline : make generate → make load → make check (Windows : .\run.ps1). » — process d'exécution décrit mais pas d'historique de commits ni note IA.
+- Piste d'amélioration : Inclure un petit log de commits (≥3) avec messages significatifs et une note indiquant l'usage d'IA/outils et la validation humaine effectuée.
 
 **Reproducibility**
-- Observation : Les instructions de reproduction sont fournies (make generate; make load; make check; make sql FILE=...), facilitant la reproduction avec un clone propre.
-- Piste d'amélioration : Documenter explicitement les prérequis (versions, dépendances) et garantir l'absence de chemins codés en dur dans les scripts.
+- Observation : Section Reproduction : « make generate; make load; make check; make sql FILE=sql/analysis/basket_pairs.sql » — instructions de reproduction fournies.
+- Piste d'amélioration : Préciser l'environnement exact (DuckDB/version, dépendances) et vérifier l'absence de chemins codés en dur dans les scripts pour atteindre l'excellent.
 
 ## 3. Déclaration d'utilisation de l'IA
 
-> La déclaration est détaillée sur les modèles utilisés, les étapes d'usage et les méthodes de validation par l'humain. Elle n'indique cependant pas clairement les limites du modèle ni des erreurs ou hallucinations observées lors des interactions.
+> La déclaration décrit bien quels modèles ont été utilisés, à quelles étapes et comment vous avez validé les sorties avec des exécutions et relectures locales. En revanche elle ne documente pas clairement les limites, erreurs ou comportements inattendus des outils IA — ajoutez des exemples concrets d'erreurs/limitations observées et comment vous y avez remédié.
 
 **Sujets bien couverts dans votre déclaration :**
 
@@ -80,11 +80,11 @@ LIMIT 8;
 
 ## 5. Traçabilité
 
-- **Run ID :** `20260529T125427Z-dfc5d65b`
+- **Run ID :** `20260622T150322Z-f6a7bca4`
 - **Devoir :** `S04`
 - **Étudiant·e :** `XArsenault`
-- **Commit analysé :** `a634588`
-- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260529T125427Z-dfc5d65b/XArsenault/`
+- **Commit analysé :** `944f5df`
+- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260622T150322Z-f6a7bca4/XArsenault/`
 - **Prompts (SHA-256) :**
   - `sql_extractor_system` : `90ee9e277de7a27f...`
   - `rubric_grader_system` : `505f32d1d8319d66...`
