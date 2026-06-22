@@ -1,10 +1,8 @@
-# Rétroaction automatisée -- S01 (Diagnostic fondamental -- NexaMart kickoff)
+# Rétroaction automatisée -- S01 (NexaMart kickoff : pourquoi l'organisation ne peut pas répondre à ses propres questions)
 
-_Générée le 2026-05-15T12:36:02+00:00 -- Run `20260515T122624Z-00a5a04f`_
+_Générée le 2026-06-22T15:34:40+00:00 -- Run `20260622T152646Z-9f8024aa`_
 
-Ce document est produit par un pipeline reproductible (vérification SQL déterministe + analyse LLM du brief et de la déclaration IA). Une revue humaine précède toujours sa publication. **À ce stade expérimental, aucune note ni étiquette de niveau n'est diffusée : l'objectif est purement formatif.**
-
-> ⚠️ **Avertissement instructeur (à retirer avant publication) :** cette analyse a été générée avec `--skip-pull`. Le contenu correspond au commit local et **n'est peut-être pas la dernière version poussée par l'étudiant·e**.
+Ce document est produit par un pipeline reproductible (validation automatique du livrable + analyse LLM du brief et de la déclaration IA). Une revue humaine précède toujours sa publication. **À ce stade expérimental, aucune note ni étiquette de niveau n'est diffusée : l'objectif est purement formatif.**
 
 ---
 
@@ -12,105 +10,64 @@ Ce document est produit par un pipeline reproductible (vérification SQL déterm
 
 La requête extraite de votre brief n'a pas pu être validée automatiquement. Quelques pistes constructives ci-dessous pour vous aider à la rendre exécutable et alignee avec la question posée.
 
-_Observation technique : erreur d'exécution SQL: Parser Error: syntax error at or near "┌───────────┬───────────────────┬─────────┬─────────────┬────────────────────┬──────────┬────────────┐"_
+_Observation technique : colonnes manquantes (oracle): category, quarter_
 
 <details><summary>Requête analysée — cliquez pour déplier</summary>
 
 ```sql
-WITH quarterly_sales AS (
-    SELECT
-        s.region
-      , p.category
-      , d.quarter
-      , SUM(f.line_total) AS total_sales
-    FROM raw_fact_sales f
-    INNER JOIN raw_dim_product p ON f.product_id = p.product_id
-    INNER JOIN raw_dim_store s ON f.store_id = s.store_id
-    INNER JOIN raw_dim_date d ON f.order_date = d.date_key
-    GROUP BY s.region, p.category, d.quarter
-),
-with_lag AS (
-    SELECT
-        *
-      , LAG(total_sales) OVER (
-            PARTITION BY region, category
-            ORDER BY quarter
-        ) AS prev_quarter_sales
-      , total_sales - LAG(total_sales) OVER (
-            PARTITION BY region, category
-            ORDER BY quarter
-        ) AS delta
-    FROM quarterly_sales
-)
-SELECT
-    region
-  , category
-  , quarter
-  , ROUND(total_sales, 2)        AS total_sales
-  , ROUND(prev_quarter_sales, 2) AS prev_quarter_sales
-  , ROUND(delta, 2)              AS delta
-  , ROUND(delta / prev_quarter_sales * 100, 1) AS pct_change
-FROM with_lag
-WHERE delta < 0
-  AND prev_quarter_sales IS NOT NULL
-ORDER BY pct_change ASC
-LIMIT 10;
-
-┌───────────┬───────────────────┬─────────┬─────────────┬────────────────────┬──────────┬────────────┐
-│  region   │     category      │ quarter │ total_sales │ prev_quarter_sales │  delta   │ pct_change │
-│  varchar  │      varchar      │  int64  │   double    │       double       │  double  │   double   │
-├───────────┼───────────────────┼─────────┼─────────────┼────────────────────┼──────────┼────────────┤
-│ Québec    │ Home & Garden     │       2 │      419.27 │            3294.37 │  -2875.1 │      -87.3 │
-│ Estrie    │ Clothing          │       2 │       87.09 │             590.17 │  -503.08 │      -85.2 │
-│ BC        │ Books & Media     │       3 │      804.34 │            5122.84 │  -4318.5 │      -84.3 │
-│ Estrie    │ Sports & Outdoors │       4 │      235.67 │             996.98 │  -761.31 │      -76.4 │
-│ Outaouais │ Electronics       │       2 │       288.7 │            1011.24 │  -722.54 │      -71.5 │
-│ Estrie    │ Toys & Games      │       4 │      905.28 │            2899.11 │ -1993.83 │      -68.8 │
-│ Ontario   │ Clothing          │       4 │     1034.37 │             3059.9 │ -2025.53 │      -66.2 │
-│ Ontario   │ Home & Garden     │       2 │      1024.0 │            3001.14 │ -1977.14 │      -65.9 │
-│ Alberta   │ Automotive        │       4 │     2580.39 │            7514.94 │ -4934.55 │      -65.7 │
-│ BC        │ Beauty & Health   │       3 │      887.85 │            2492.47 │ -1604.62 │      -64.4 │
-├───────────┴───────────────────┴─────────┴─────────────┴────────────────────┴──────────┴────────────┤
-│ 10 rows                                                                                  7 columns │
-└───────────────────────────────────────────────────────────────────────────────────────────────────
+SELECT s.région, ROUND(SUM(f.revenue), 2) AS revenue
+FROM fact_sales f
+JOIN dim_store s USING (store_key)
+GROUP BY s.région
+ORDER BY revenue DESC
 ```
 
 </details>
 
+- Colonnes retournées : `région, revenue`
+- Correspondance avec les colonnes attendues :
+  - `category` → `(à ajouter ou renommer)`
+  - `region` → `région`
+  - `quarter` → `(à ajouter ou renommer)`
+  - `revenue` → `revenue`
 
 **Pistes :**
-> Tables référencées dans votre requête mais absentes de la base : `quarterly_sales`, `with_lag`.
-> Tables disponibles dans `db/nexamart.duckdb` : `raw_bridge_campaign_allocation`, `raw_bridge_customer_segment`, `raw_customer_changes`, `raw_customer_profile_bands`, `raw_customer_scd3_history`, `raw_dim_channel`, `raw_dim_customer`, `raw_dim_date`, `raw_dim_geography`, `raw_dim_product`, `raw_dim_segment_outrigger`, `raw_dim_store`, `raw_fact_budget`, `raw_fact_daily_inventory`, `raw_fact_inventory_snapshot`, `raw_fact_order_pipeline`, `raw_fact_orders_transaction`, `raw_fact_promo_exposure`, `raw_fact_returns`, `raw_fact_sales`.
+> Aucune requête SQL trouvée dans le brief ni dans les fichiers du repo. Une requête canonique a été synthétisée à partir du schéma de votre base pour vérifier que vos tables et jointures sont correctement en place. Ajoutez votre requête finale dans la section « Preuve » avec un bloc ```sql ... ``` pour éliminer cette étape.
+> Synonymes acceptés par colonne:
+  category: ['category', 'categorie', 'p.category', 'sous_categorie']
+  region: ['region', 's.region']
+  quarter: ['quarter', 'trimestre', 'd.quarter', 'q']
+  revenue: ['net_revenue', 'revenue', 'revenu', 'total_revenue', 'ca', 'sales', 'line_total', 'gross_revenue']
 
 ## 2. Rétroaction pédagogique sur le brief
 
-> Très bon diagnostic : le modèle, les requêtes et les contrôles sont complets et la justification exécutive est pertinente. Il manque toutefois la traçabilité du processus (commits, note IA) et des instructions explicites de reproduction pour un coéquipier.
+> Bon diagnostic opérationnel et preuve SQL solide : le brief identifie des déclins précis et fournit des validations convaincantes. Il manque toutefois la traçabilité (commits/IA) et une garantie de reproductibilité complète pour productionnaliser le livrable.
 
 ### Observations par dimension
 
 **Model quality**
-- Observation : Le brief précise le grain (« une ligne = une ligne de vente »), définit les dimensions (category via dim_produit, region via dim_store, dim_date) et propose la mesure line_total comme 'revenu net par ligne de vente'.
-- Piste d'amélioration : Ajouter une discussion explicite sur la stratégie SCD (type 2 vs type 1) et justifier le pattern choisi pour préserver l'historique des catégories.
+- Observation : Le brief déclare explicitement le grain («une ligne = une ligne de vente») et liste dim_product, dim_store et dim_date comme dimensions clés.
+- Piste d'amélioration : Préciser le traitement des changements historiques (SCD) et justifier le choix du pattern (ex. SCD Type 2 vs Type 1) pour préserver l'historique des catégories.
 
 **Validation quality**
-- Observation : Le livrable inclut une requête SQL reproduisible qui calcule les ventes trimestrielles, l'usage de LAG pour QoQ, et des contrôles de réconciliation et d'intégrité référentielle (écart 0 $, orphelins 0).
-- Piste d'amélioration : Documenter le traitement des cas limites dans la requête (p.ex. prev_quarter_sales = 0, NULLs) et ajouter un check automatisé 'make check' listé dans le README.
+- Observation : La section Preuve inclut une requête SQL avec agrégations et LAG, et la section Validation montre réconciliation des totaux, intégrité référentielle (0 orphelins) et vérification du grain.
+- Piste d'amélioration : Ajouter des checks explicites pour les NULLs et documenter les seuils/exclusions (ex. prev_quarter_sales = 0) pour éviter divisions par zéro.
 
 **Executive justification**
-- Observation : La section 'Réponse exécutive' résume les déclins clés (ex. Québec/Home & Garden -87% Q2) et conclut que certains signaux sont statistiquement fragiles, avec recommandations opérationnelles et priorités court/moyen/long terme.
-- Piste d'amélioration : Formuler une décision claire à demander au CEO (p.ex. valider investigation prioritaire pour les 3 combinaisons région/catégorie listées) et préciser le seuil décisionnel utilisé.
+- Observation : La Réponse exécutive synthétise les déclins clés (ex. Québec/Home & Garden -87% en Q2) et propose des recommandations court/moyen/long terme pour le CEO.
+- Piste d'amélioration : Formuler une décision claire demandée au CEO (par ex. valider budget d'investigation pour les 3 combos région/catégorie prioritaires).
 
 **Process trace**
-- Observation : Le brief ne contient aucune trace de commits git, ni note sur l'usage d'IA ou journal de décisions.
-- Piste d'amélioration : Inclure un bref historique de commits (≥3) avec messages, et une note IA indiquant outils utilisés + validation humaine.
+- Observation : Aucune mention d'un historique de commits git, ni de note d'utilisation d'IA ou de decision log dans le brief.
+- Piste d'amélioration : Fournir un journal de commits (≥3 commits significatifs) et une note IA précisant outil, prompts et validation humaine.
 
 **Reproducibility**
-- Observation : Le SQL et les résultats sont fournis dans le brief, mais il manque des instructions de reproduction (README, commandes DuckDB/Make, ou chemins relatifs).
-- Piste d'amélioration : Ajouter un README minimal avec étapes 'clone → ouvrir DuckDB / run sql → make check' et exemples de commandes pour reproduire les checks en <5 minutes.
+- Observation : Le brief inclut le SQL et les checks, mais il n'y a pas d'instructions de clonage/README ni d'indication que les chemins ou dépendances sont génériques.
+- Piste d'amélioration : Ajouter un README avec étapes exactes (clone → DuckDB → make check) et supprimer tout chemin codé en dur pour garantir exécution sur un clone propre.
 
 ## 3. Déclaration d'utilisation de l'IA
 
-> La déclaration est complète et documente l'outil (avec version), le rôle joué par l'IA, les vérifications humaines et des limites de données. Bon niveau de détail; continuez d'être aussi précis pour les prochaines séances.
+> La déclaration est complète et détaillée : outils nommés avec versions, étapes d'utilisation, validations reproductibles et exemples d'erreurs/écarts sont fournis. Bonne pratique de traçabilité et de validation locale — rien d'interdit détecté, la note maximale est justifiée.
 
 **Sujets bien couverts dans votre déclaration :**
 
@@ -121,17 +78,17 @@ LIMIT 10;
 
 ## 4. Pistes d'action pour la prochaine itération
 
-- Reprendre la requête de la section « Preuve » pour qu'elle s'exécute sur `db/nexamart.duckdb` et qu'elle produise la forme attendue (voir pistes en section 1).
+- Reprendre la requête de la section « Preuve » pour qu'elle s'exécute sur db/nexamart.duckdb et qu'elle produise la forme attendue (voir pistes en section 1).
 
 ---
 
 ## 5. Traçabilité
 
-- **Run ID :** `20260515T122624Z-00a5a04f`
+- **Run ID :** `20260622T152646Z-9f8024aa`
 - **Devoir :** `S01`
 - **Étudiant·e :** `XArsenault`
-- **Commit analysé :** `d6c610c`
-- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260515T122624Z-00a5a04f/XArsenault/`
+- **Commit analysé :** `944f5df`
+- **Audit (côté instructeur) :** `tools/instructor/feedback_pipeline/audit/20260622T152646Z-9f8024aa/XArsenault/`
 - **Prompts (SHA-256) :**
   - `sql_extractor_system` : `90ee9e277de7a27f...`
   - `rubric_grader_system` : `505f32d1d8319d66...`
